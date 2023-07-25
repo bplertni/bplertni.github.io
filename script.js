@@ -360,14 +360,11 @@ function CreateChessGame() {
   debugBody.innerHTML = "";
 
   // Code Tester
-  if (DEBUG_FLAG) {
-    console.log(test.fens);
-    console.log(test.efens);
-    console.log(test.moves);
-  }
+ 
   console.log("JSON Objects: ");
   console.log(JSON.stringify(test));
   console.log(test.xfens);
+
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
@@ -394,7 +391,7 @@ function CreateChessGame() {
   for (i = 0; i < test.xfens.length; i++) {
     row = tbl.insertRow();
     cell = row.insertCell();
-    cell.innerHTML = (i+1).toString();
+    cell.innerHTML = (i).toString();
     for (cd = 0; cd <= 63; cd++) {
       cell = row.insertCell();
       conts = test.xfens[i][cd];
@@ -436,9 +433,6 @@ function CreateChessGame() {
 
     const xPieceCell = newRow.insertCell();
     let xPiecePos = squareCode2Idx(toCell.textContent); //Use "to" cell square code, get index, use index to get xpiece in xfens
-    if (i == 30) {
-      console.log(test.xfens[i + 1][xPiecePos]);
-    }
     xPieceCell.textContent = test.xfens[i + 1][xPiecePos]; // i + 1 because first index of xfens is a starting config of chessboard.
 
     const fenCell = newRow.insertCell();
