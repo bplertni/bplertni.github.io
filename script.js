@@ -104,7 +104,6 @@ function ChessGame(ipgn) {
   }
 
   this.pgn = ipgn; // expect a validated pgn but should validate anyway
-  this.pgnArray = [];
   this.fens = []; // holding the fens from the digested pgn
   this.efens = []; // expanded fens as an array with full spaces as '.'
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
@@ -130,13 +129,6 @@ function ChessGame(ipgn) {
 
   // =====  initialize the worker objects  =====
   chess1.load_pgn(ipgn);
-  this.pgnArray = chess1
-    .pgn()
-    .split(/\d+\./)
-    .filter(Boolean)
-    .map((move) => move.trim())
-    .join(" ")
-    .split(" ");
   chess2.load_pgn("");
 
   // the JSON syntax here is for doing a DEEP copy of an array of strings
@@ -173,7 +165,6 @@ function ChessGame(ipgn) {
   });
   if (DEBUG_FLAG) {
     console.log(this.fens);
-    debugger;
   }
   let local_ix = 0; //this aligns with the TURN/PLY but starts at 0
   // ====================================================================================
@@ -200,6 +191,11 @@ function ChessGame(ipgn) {
       from: map_obj.from,
       to: map_obj.to,
     });
+
+    // let sanTest = map_obj.san.toLowerCase()
+    // if (sanTest.includes('o-o')) {
+    //   debugger
+    // }
 
     efen = this.efens[local_ix];
     if (DEBUG_FLAG) {
@@ -244,7 +240,7 @@ function ChessGame(ipgn) {
       captured = map_obj.captured.toLowerCase();
     }
 
-    if (lsan.includes("o-o")) {
+    if (lsan.includes("o-o") || lsan.includes("o-o-o")) {
       castling = true;
     }
     if (ppiece == "p" && (lto[1] == "8" || lto[1] == "1")) {
@@ -277,6 +273,9 @@ function ChessGame(ipgn) {
         // thus for all squares not identified by lto just copy the prior piece
         // except for the 3 special cases: castele, enpass, promo?
         if (to_ix != ix) {
+          if (castling) {
+            continue
+          }
           xfen_curr[ix] = JSON.parse(JSON.stringify(xfen_prev[ix]));
         } else {
           // and for the one square identified by lto then copy the piece
@@ -296,24 +295,27 @@ function ChessGame(ipgn) {
           if (castling == true) {
             // just 4 possible move combos for castling so this can be hard-coded
             // wk1 to g1 , wr2 to f1
-            // wki to c1 , wr1 to d1
+            // wk1 to c1 , wr1 to d1
             // bk1 to g8 , br2 to f8
             // bk2 to c8 , br1 to d8
+            // if (lsan.includes('o-o')) {
+            //   debugger
+            // }
             if (lto == "g1") {
               castle_rook_to_ix = squareCode2Idx("f1");
-              xfen_curr[castle_rook_to_ix] = JSON.parse(JSON.stringify("wr2"));
+              xfen_curr[castle_rook_to_ix] = "wr2";
             }
-            if (lto == "c1") {
+            if (lto == "c1") { // O-O-O White
               castle_rook_to_ix = squareCode2Idx("d1");
-              xfen_curr[castle_rook_to_ix] = JSON.parse(JSON.stringify("wr1"));
+              xfen_curr[castle_rook_to_ix] = "wr1";
             }
             if (lto == "g8") {
               castle_rook_to_ix = squareCode2Idx("f8");
-              xfen_curr[castle_rook_to_ix] = JSON.parse(JSON.stringify("br2"));
+              xfen_curr[castle_rook_to_ix] = "br2";
             }
-            if (lto == "c8") {
+            if (lto == "c8") { // O-O-O Black
               castle_rook_to_ix = squareCode2Idx("d8");
-              xfen_curr[castle_rook_to_ix] = JSON.parse(JSON.stringify("br1"));
+              xfen_curr[castle_rook_to_ix] = "br1";
             }
           }
         }

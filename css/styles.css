@@ -1,3 +1,12 @@
+.flex-container {
+  display: flex;
+}
+
+.box {
+  margin-left: 1rem;
+  margin-right: 2rem;
+}
+
 h1 {
   text-align: left;
   margin: 0;
@@ -5,8 +14,9 @@ h1 {
 }
 
 table {
-  /* Disables the "padding" of cells, default table cells inherently have 2px of border-spacing */
+  /* Changes the inherent properties of table cells for desired formatting*/
   border-spacing: 0px;
+  border-collapse: collapse;
 }
 
 td,
@@ -25,7 +35,7 @@ th {
 
 #pgnTextArea {
   width: 25rem;
-  height: 20rem;
+  height: 95%;
 }
 
 #div100 {
@@ -33,6 +43,12 @@ th {
   width: 1250px;
   border: 1px solid #ccc;
   overflow: auto;
+}
+
+#header-wrapper {
+  position: relative;
+  height: 40px;
+  z-index: 1;
 }
 
 #table-label {
@@ -62,10 +78,21 @@ th {
   display: block;
   font-size: 10px;
   line-height: 1.2;
+  z-index: -1
 }
 
 thead {
   background-color: lightgrey;
+  position: sticky;
+  top: 0;
+}
+
+thead tr {
+    background-color: lightgrey;
+}
+
+tbody {
+  margin-top: 100px;
 }
 
 .supsub sub {
