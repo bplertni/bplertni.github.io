@@ -17,7 +17,7 @@ const squareXlat = [
     'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',  // 
     'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',  //  K
     'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'   // 
-   ];              
+   ];  
 
 // ====================================================================================================================
 // Helper Functions
@@ -31,6 +31,24 @@ function validatePGN() {
     return inputPGN;
   } else {
     return null;
+  }
+}
+
+function formatCells(cell_content) {
+  let inner = "";
+  if (cell_content.length <= 3) {
+    inner =
+      cell_content.substring(1, 2) +
+      '<span class="supsub">' +
+      "<sup>" +
+      cell_content.substring(0, 1) +
+      "</sup>" +
+      "<sub>" +
+      cell_content.substring(2, 3) +
+      "</sub></span>";
+    return inner;
+  } else if (cell_content.length > 3) {
+    return cell_content;
   }
 }
 
@@ -109,7 +127,7 @@ function ChessGame(ipgn) {
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
   this.moves = [""]; // pgn part for each position
   this.moved = []; // true/false for a given square to indicate if it's piece has moved
-  this.captured = []; // array, indexed by turn/ply indicating what was captured, if anything
+  this.captured = [""]; // array, indexed by turn/ply indicating what was captured or promoted
   this.history = []; // verbose history returned by chess.js.history
 
   // workers used in the construction of the ChessGame object
@@ -274,7 +292,7 @@ function ChessGame(ipgn) {
         // except for the 3 special cases: castele, enpass, promo?
         if (to_ix != ix) {
           if (castling) {
-            continue
+            continue;
           }
           xfen_curr[ix] = JSON.parse(JSON.stringify(xfen_prev[ix]));
         } else {
@@ -305,7 +323,8 @@ function ChessGame(ipgn) {
               castle_rook_to_ix = squareCode2Idx("f1");
               xfen_curr[castle_rook_to_ix] = "wr2";
             }
-            if (lto == "c1") { // O-O-O White
+            if (lto == "c1") {
+              // O-O-O White
               castle_rook_to_ix = squareCode2Idx("d1");
               xfen_curr[castle_rook_to_ix] = "wr1";
             }
@@ -313,7 +332,8 @@ function ChessGame(ipgn) {
               castle_rook_to_ix = squareCode2Idx("f8");
               xfen_curr[castle_rook_to_ix] = "br2";
             }
-            if (lto == "c8") { // O-O-O Black
+            if (lto == "c8") {
+              // O-O-O Black
               castle_rook_to_ix = squareCode2Idx("d8");
               xfen_curr[castle_rook_to_ix] = "br1";
             }
@@ -325,15 +345,46 @@ function ChessGame(ipgn) {
     // push the new xfen onto the end of the array
     this.xfens.push(xfen_curr);
 
-    if (DEBUG_FLAG) {
-      console.log(display_xfen_debug(xfen_curr));
-    }
-
     // prepare for next iteration through the half-move list (ply)
     local_ix++;
     xfen_prev = JSON.parse(JSON.stringify(xfen_curr));
     return map_obj;
   });
+
+  // Make an array storing all the captured/promoted pieces; had to be done due to desynchronization of history and xfens
+  for (let i = 0; i < this.history.length; i++) {
+    let output = "";
+    let toSquare = this.history[i]["to"];
+    let fromSquare = this.history[i]["from"];
+    let toIndex = squareCode2Idx(toSquare);
+    let fromIndex = squareCode2Idx(fromSquare);
+    let capturedXPiece = "";
+    let promotedXPiece = "";
+
+    if ("captured" in this.history[i] && "promotion" in this.history[i]) {
+      promotedXPiece = this.xfens[i][fromIndex];
+      capturedXPiece = this.xfens[i][toIndex];
+      console.log(
+        promotedXPiece +
+          " captured " +
+          capturedXPiece +
+          " and was promoted at move " +
+          (i + 1)
+      );
+      output = promotedXPiece + ", " + capturedXPiece;
+    } else if ("promotion" in this.history[i]) {
+      promotedXPiece = this.xfens[i][fromIndex];
+      console.log(promotedXPiece + " was promoted at move " + (i + 1));
+      output = promotedXPiece;
+    } else if ("captured" in this.history[i]) {
+      capturedXPiece = this.xfens[i][toIndex];
+      console.log(capturedXPiece + " was captured at move " + (i + 1));
+      output = capturedXPiece;
+    } else {
+      output = "";
+    }
+    this.captured.push(output);
+  }
 
   if (DEBUG_FLAG) {
     for (ix = 0; ix < this.xfens.length; ix++) {
@@ -362,11 +413,10 @@ function CreateChessGame() {
   debugBody.innerHTML = "";
 
   // Code Tester
- 
+
   console.log("JSON Objects: ");
   console.log(JSON.stringify(test));
   console.log(test.xfens);
-
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
@@ -378,14 +428,17 @@ function CreateChessGame() {
   // xfen table header
   cell = trHeader.insertCell();
   cell.innerHTML = " ";
- 
-  for (i = 0; i <= 63; i++) {
+
+  for (i = 0; i <= 64; i++) {
     cell = trHeader.insertCell();
     conts = i.toString();
     if (conts.length < 2) {
       conts = "0" + conts;
     }
     conts = conts + "<br>" + squareXlat[i];
+    if (i == 64) {
+      conts = "xx"; // Add 'xx' or captured column to the end
+    }
     cell.innerHTML = conts;
   }
 
@@ -393,20 +446,16 @@ function CreateChessGame() {
   for (i = 0; i < test.xfens.length; i++) {
     row = tbl.insertRow();
     cell = row.insertCell();
-    cell.innerHTML = (i).toString();
-    for (cd = 0; cd <= 63; cd++) {
+    cell.innerHTML = i.toString();
+    for (cd = 0; cd <= 64; cd++) {
       cell = row.insertCell();
-      conts = test.xfens[i][cd];
-      inner =
-        conts.substring(1, 2) +
-        '<span class="supsub">' +
-        "<sup>" +
-        conts.substring(0, 1) +
-        "</sup>" +
-        "<sub>" +
-        conts.substring(2, 3) +
-        "</sub></span>";
-      cell.innerHTML = inner;
+      if (cd == 64) {
+        cell.innerHTML = formatCells(test.captured[i]);
+      } else {
+        conts = test.xfens[i][cd];
+        console.log("DEBUG Content Length: " + conts.length);
+        cell.innerHTML = formatCells(conts);
+      }
     }
   }
 
@@ -439,7 +488,7 @@ function CreateChessGame() {
 
     const fenCell = newRow.insertCell();
     fenCell.textContent = test.fens[i];
-    fenCell.setAttribute("id", "FEN")
+    fenCell.setAttribute("id", "FEN");
   }
 }
 
