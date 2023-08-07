@@ -1,4 +1,5 @@
 .flex-container {
+  height: 230px;
   display: flex;
 }
 
@@ -12,6 +13,7 @@ h1 {
   text-align: left;
   margin: 0;
   padding: 0.5rem 0.5rem 0.5rem 0;
+  margin: 0px 0px 15px 15px;
 }
 
 table {
@@ -36,12 +38,12 @@ th {
 
 #pgnTextArea {
   width: 25rem;
-  height: 368px;
+  height: 200px;
 }
 
 #div100 {
-  height: 650px;
-  width: 1250px;
+  height: 300px;
+  width: 1345px;
   border: 1px solid #ccc;
   overflow: auto;
 }
@@ -67,6 +69,10 @@ th {
   height: 20px;
   border: 1px solid grey;
   font-size: 14px;
+}
+
+#xx-cell {
+  width: 23px;
 }
 
 .supsub {
@@ -104,157 +110,69 @@ tbody {
   text-align: left;
 }
 
-
-
+/* Styles to color the listbox-area grey */
 .listbox-area {
-  height: 350px;
-  width: fit-content;
-  display: grid;
-  grid-gap: 2em;
-  grid-template-columns: repeat(2, 1fr);
-  padding: 20px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  background: #eee;
+  height: inherit;
+  background-color: #f1f1f1;
+  padding: 10px;
+  width: 500px;
 }
 
-[role="listbox"] {
-  width: 400px;
-  margin: 1em 0 0;
-  padding: 0;
-  min-height: 100px;
-  border: 1px solid #aaa;
+/* Styles for the scrollable container */
+.listbox-container {
+  height: 200px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  border: 1px solid #ccc; /* Add a border for the container */
   background: white;
+  margin: 10px 5px 5px 5px;
 }
 
-[role="listbox"]#ss_elem_list {
-  position: relative;
-  max-height: 18em;
-  overflow-y: auto;
+/* Styles for the list items */
+ul  {
+  padding-inline-start: 15px;
+  padding-right: 5px;
 }
-
-[role="listbox"] + *,
-.listbox-label + * {
-  margin-top: 1em;
-}
-
-[role="group"] {
-  margin: 0;
-  padding: 0;
-}
-
-[role="group"] > [role="presentation"] {
-  display: block;
-  margin: 0;
-  padding: 0 0.5em;
-  font-weight: bold;
-  line-height: 2;
-  background-color: #ccc;
-}
-
-[role="option"] {
-  position: relative;
-  display: block;
-  padding: 0 1em 0 1.5em;
-  line-height: 1.8em;
-}
-
-[role="option"].focused {
-  background: #bde4ff;
-}
-
-[role="option"][aria-selected="true"]::before {
-  position: absolute;
-  left: 0.5em;
-  content: "✓";
-}
-
-button[aria-haspopup="listbox"] {
-  position: relative;
-  padding: 5px 10px;
-  width: 150px;
-  border-radius: 0;
-  text-align: left;
-}
-
-button[aria-haspopup="listbox"]::after {
-  position: absolute;
-  right: 5px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-top-color: currentcolor;
-  border-bottom: 0;
-  content: "";
-}
-
-button[aria-haspopup="listbox"][aria-expanded="true"]::after {
-  position: absolute;
-  right: 5px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border: 8px solid transparent;
-  border-top: 0;
-  border-bottom-color: currentcolor;
-  content: "";
-}
-
-button[aria-haspopup="listbox"] + [role="listbox"] {
-  position: absolute;
-  margin: 0;
-  width: 9.5em;
-  max-height: 10em;
-  border-top: 0;
-  overflow-y: auto;
-}
-
-[role="toolbar"] {
-  display: flex;
-}
-
-[role="toolbar"] > * {
-  border: 1px solid #aaa;
-  background: #ccc;
-}
-
-[role="toolbar"] > [aria-disabled="false"]:focus {
-  background-color: #eee;
-}
-
-button {
-  font-size: inherit;
-}
-
-button[aria-disabled="true"] {
-  opacity: 0.5;
-}
-
-.move-right-btn::after {
-  content: " →";
-}
-
-.move-left-btn::before {
-  content: "← ";
-}
-
-.annotate {
-  color: #366ed4;
-  font-style: italic;
-}
-
-.hidden {
-  display: none;
-}
-
-.offscreen {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  font-size: 14px;
+#pgn-list li {
+  cursor: pointer;
+  padding: 5px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Styles for the selected list item */
+#pgn-list li.selected {
+  background-color: #c0c0c0; /* Change the background color when selected */
+}
+
+/* Styles to indicate the hover state */
+#pgn-list li:hover {
+  background-color: #e5e5e5; /* Change the background color on hover */
+}
+
+li:hover .custom-tooltip {
+  visibility: visible;
+  top: -30px; /* Adjust this value to position the tooltip above the <li> element */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.custom-tooltip {
+  visibility: hidden;
+  position: absolute;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+#copyAlert {
+  color:red;
+}
+
+#JSONTextArea {
+  height: 225px;
+  width: 400px;
 }

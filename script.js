@@ -398,11 +398,22 @@ function ChessGame(ipgn) {
   }
 }
 
-//======== TESTING GROUNDS =======
+// ========== Button Functions ============ //
 
-function CreateChessGame() {
+// Clear all tables
+function clearTables() {
+  let tbody = document.getElementById("bdy100");
+  tbody.innerHTML = "";
+  let tr = document.getElementById("tr100");
+  tr.innerHTML = "";
+  let debugBody = document.getElementById("debug-body");
+  debugBody.innerHTML = "";
+}
+
+// Process information into debug tables
+function processChessGame() {
   let pgn = validatePGN();
-  let test = new ChessGame(pgn);
+  let currentChessGame = new ChessGame(pgn);
 
   // Clear XFEN and Debug table header/row to prevent duplication
   let tbody = document.getElementById("bdy100");
@@ -415,15 +426,14 @@ function CreateChessGame() {
   // Code Tester
 
   console.log("JSON Objects: ");
-  console.log(JSON.stringify(test));
-  console.log(test.xfens);
+  console.log(JSON.stringify(currentChessGame));
+  console.log(currentChessGame.xfens);
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
   let row = "";
   let cell = "";
   let conts = "";
-  let inner = "";
 
   // xfen table header
   cell = trHeader.insertCell();
@@ -437,30 +447,31 @@ function CreateChessGame() {
     }
     conts = conts + "<br>" + squareXlat[i];
     if (i == 64) {
-      conts = "xx"; // Add 'xx' or captured column to the end
+      cell.setAttribute("id", "xx-cell");
+      conts = "xx"; // Add 'xx' column to the header
     }
     cell.innerHTML = conts;
   }
 
   // xfen table body
-  for (i = 0; i < test.xfens.length; i++) {
+  for (i = 0; i < currentChessGame.xfens.length; i++) {
     row = tbl.insertRow();
     cell = row.insertCell();
     cell.innerHTML = i.toString();
     for (cd = 0; cd <= 64; cd++) {
       cell = row.insertCell();
       if (cd == 64) {
-        cell.innerHTML = formatCells(test.captured[i]);
+        // Add captured pieces into 'xx' colum
+        cell.innerHTML = formatCells(currentChessGame.captured[i]);
       } else {
-        conts = test.xfens[i][cd];
-        console.log("DEBUG Content Length: " + conts.length);
+        conts = currentChessGame.xfens[i][cd];
         cell.innerHTML = formatCells(conts);
       }
     }
   }
 
   // Iterate through the arrays and populate each column
-  for (let i = 0; i < test.history.length; i++) {
+  for (let i = 0; i < currentChessGame.history.length; i++) {
     // Create a new row
     const newRow = debugBody.insertRow();
 
@@ -468,35 +479,39 @@ function CreateChessGame() {
     turnCell.textContent = i + 1;
 
     const pgnCell = newRow.insertCell();
-    pgnCell.textContent = test.history[i]["san"]; // Access each move's history object, access "to" key, get PGN of the turn
+    pgnCell.textContent = currentChessGame.history[i]["san"]; // Access each move's history object, access "to" key, get PGN of the turn
 
     const fromCell = newRow.insertCell();
-    fromCell.textContent = test.history[i]["from"];
+    fromCell.textContent = currentChessGame.history[i]["from"];
 
     const toCell = newRow.insertCell();
-    toCell.textContent = test.history[i]["to"];
+    toCell.textContent = currentChessGame.history[i]["to"];
 
     const pieceCell = newRow.insertCell();
-    pieceCell.textContent = test.history[i]["piece"];
+    pieceCell.textContent = currentChessGame.history[i]["piece"];
 
     const colorCell = newRow.insertCell();
-    colorCell.textContent = test.history[i]["color"];
+    colorCell.textContent = currentChessGame.history[i]["color"];
 
     const xPieceCell = newRow.insertCell();
     let xPiecePos = squareCode2Idx(toCell.textContent); //Use "to" cell square code, get index, use index to get xpiece in xfens
-    xPieceCell.textContent = test.xfens[i + 1][xPiecePos]; // i + 1 because first index of xfens is a starting config of chessboard.
+    xPieceCell.textContent = currentChessGame.xfens[i + 1][xPiecePos]; // i + 1 because first index of xfens is a starting config of chessboard.
 
     const fenCell = newRow.insertCell();
-    fenCell.textContent = test.fens[i];
+    fenCell.textContent = currentChessGame.fens[i];
     fenCell.setAttribute("id", "FEN");
   }
 }
 
-function clearTables() {
-  let tbody = document.getElementById("bdy100");
-  tbody.innerHTML = "";
-  let tr = document.getElementById("tr100");
-  tr.innerHTML = "";
-  let debugBody = document.getElementById("debug-body");
-  debugBody.innerHTML = "";
+
+//  Export chess game into JSON
+function exportChessGame() {
+  let pgn = validatePGN();
+  let currentChessGame = new ChessGame(pgn);
+  let jsonOut = document.getElementById("JSONTextArea")
+  jsonOut.innerHTML = JSON.stringify(currentChessGame.xfens)
 }
+
+
+
+

@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PGN Parser</title>
-    <link rel="stylesheet" href="./css/styles.css" />
-  </head>
-  <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
-    <script src="script.js"></script>
-    <h1 id="title">PGN Parser Prototype</h1>
-    <div class="flex-container">
-      <div class="box input-box">
-        <label for="pgnTextArea">Paste PGN here:</label><br />
-        <textarea id="pgnTextArea"></textarea><br />
-        <button id="createGameButton" onclick="CreateChessGame()">
-          Submit
-        </button>
-        <button id="clearTableButton" onclick="clearTables()">
-          Clear Tables
-        </button>
-      </div>
-      <div class="box listbox-area">
-        <div>
-          <span id="ss_elem" class="listbox-label">Sample PGNs:</span>
-          <ul id="ss_elem_list" tabindex="0" role="listbox" aria-labelledby="ss_elem">
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">Simple PGN:</div>
-              1. e4 f6 { B00 Barnes Defense } 2. Qh5+ g6 3. Qd1 { Black resigns. }
-              1-0
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PGN Parser</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+  <script src="script.js"></script>
+  <h1 id="title">PGN Parser Prototype</h1>
+  <span class="copy-alert"></span>
+  <div class="flex-container">
+    <div class="box input-box">
+      <label for="pgnTextArea">Paste PGN here:</label><br />
+      <textarea id="pgnTextArea"></textarea><br />
+      <button id="createGameButton" onclick="processChessGame()">
+        Submit
+      </button>
+      <button id="clearTableButton" onclick="clearTables()">
+        Clear Tables
+      </button>
+      <button id="exportJSONButton" onclick="exportChessGame()">
+        Export JSON
+      </button>
+    </div>
+    <div class="box listbox-area" id="listbox">
+      <div>
+        <span class="listbox-label copy-alert" >Sample PGNs: </span><span class="copy-alert" id="copyAlert"></span>
+        <div class="listbox-container">
+          <ul id="pgn-list">
+            <li title="Simple PGN">
+              1. e4 f6 { B00 Barnes Defense } 2. Qh5+ g6 3. Qd1 { Black resigns. } 1-0
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                Problematic PGN with "." for xPiece at Turn 31
-              </div>
+            <li title='Problematic PGN with "." for xPiece at Turn 31'>
               1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 Nf6 5. d3 O-O 6. h3 d6 7. Nc3
               Nd4 8. Na4 Bb6 9. Nxb6 axb6 10. Ba2 Qe7 11. Be3 c5 12. c3 Ne6 13.
               Qd2 h6 14. g4 g5 15. O-O-O Nf4 16. Rdg1 Rd8 17. h4 Kf8 18. hxg5 hxg5
@@ -42,20 +44,14 @@
               b4+ cxb4 30. cxb4+ Kb6 31. Qe3+ Kc7 32. Bd5 Rxa3 33. Qd2 Ra1+ 34.
               Kb2 Rxg1 35. Qc3+ Kb8 0-1
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN with Enpassant and Promotion to Rook
-              </div>
+            <li title="PGN with Enpassant and Promotion to Rook">
               1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 b5 6. Bxb5 Qxd5 7.
               Nxf7 Qxg2 8. Bxc6+ Qxc6 9. Nxh8 Qxh1+ 10. Ke2 Qe4+ 11. Kf1 Bh3+ 12.
               Kg1 O-O-O 13. f3 Qb7 14. a4 Qxf3 15. Qxf3 Bd6 16. b4 Be6 17. d3 g6
               18. Qc6 h5 19. b5 a5 20. bxa6 {enpass} g5 21. a7 g4 22. a8=R# {promo
               to R with mate} 1-0
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN from https://lichess.org/8fxcty8B
-              </div>
+            <li title="PGN from https://lichess.org/8fxcty8B">
               1. e4 e5 2. Nf3 b5 3. Bd3 b4 4. O-O g6 5. c4 bxc3 6. dxc3 Bg7 7. Na3
               Ne7 8. b4 O-O 9. Nc4 d6 10. Ncxe5 dxe5 11. a4 Nbc6 12. Be3 Bg4 13.
               Be2 Bxf3 14. Bxf3 Qxd1 15. Raxd1 Rfd8 16. Rxd8+ Rxd8 17. Bxa7 Ra8
@@ -64,11 +60,7 @@
               29. c4 e3 30. Nc7 e2 31. Nb5 exf1=Q+ 32. Kh2 Qxf2 33. Nd6 Bxd6+ 34.
               Kh3 Qg3# { Black wins by checkmate. } 0-1
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN from https://lichess.org/7hQ58J9X#123
-              </div>
-              <span style="font-weight: bold"></span>
+            <li title="PGN from https://lichess.org/7hQ58J9X#123">
               1. e4 c6 2. d4 d5 3. exd5 cxd5 4. c4 Nf6 5. Nf3 e6 6. Nc3 Nc6 7. c5
               Be7 8. Bb5 O-O 9. Bxc6 bxc6 10. b4 a5 11. b5 cxb5 12. Nxb5 Ba6 13.
               a4 Ne4 14. Qc2 f5 15. O-O Bf6 16. Rd1 Rb8 17. Bd2 Bxb5 18. axb5 Rxb5
@@ -82,37 +74,19 @@
               57. Kxe8 Qd5 58. f6 Qe5+ 59. Kf7 Qxh5+ 60. Kg7 Qe5 61. Kg6 Qxf6+ 62.
               Kxf6 1/2-1/2
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN: Black Queen-side Castling (O-O-O), then rook moves (Example
-                1)
-              </div>
-              <span style="font-weight: bold"></span>
+            <li title="PGN: Black Queen-side Castling (O-O-O), then rook moves (Example 1)">
               1. e4 d6 { B00 Pirc Defense } 2. Qh5 Qd7 3. h3 Qe6 4. Be2 Bd7 5. b3
               Nc6 6. d3 O-O-O 7. Qg5 Re8 8. Bg4 { Black resigns. } 1-0
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN: Black King-side Castling (O-O), then rook moves (Example 2)
-              </div>
-              <span style="font-weight: bold"></span>
+            <li title="PGN: Black King-side Castling (O-O), then rook moves (Example 2)">
               1. e4 g6 { B06 Modern Defense } 2. f3 Nf6 3. Bc4 Bh6 4. Ne2 O-O 5.
               Nd4 Re8 { Black resigns. } 1-0
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN: White Queen-side Castling (O-O-O), then rook moves (Example
-                3)
-              </div>
-              <span style="font-weight: bold"></span>
+            <li title="PGN: White Queen-side Castling (O-O-O), then rook moves (Example 3)">
               1. d3 e5 { A00 Mieses Opening: Reversed Rat } 2. Qd2 d5 3. Nc3 Nf6
               4. b4 Bxb4 5. Ba3 c5 6. O-O-O Nc6 7. Re1 Qa5 { White resigns. } 0-1
             </li>
-            <li id="ss_elem_Np" role="option">
-              <div style="font-weight: bold" id="example">
-                PGN: White King-side Castling (O-O), then rook moves (Example 4)
-              </div>
-              <span style="font-weight: bold"></span>
+            <li title="PGN: White King-side Castling (O-O), then rook moves (Example 4)">
               1. Nf3 f5 { A04 Zukertort Opening: Dutch Variation } 2. e3 Nc6 3.
               Bd3 e5 4. O-O d6 5. Re1 { White resigns. } 0-1
             </li>
@@ -120,40 +94,99 @@
         </div>
       </div>
     </div>
-    <div id="table-label">
-      <label for="div100">XFEN Array Table</label><br />
+    <div id="export-area">
+      <label for="JSONTextArea">Exported JSON Preview</label><br />
+      <textarea id="JSONTextArea"></textarea>
     </div>
-    <div id="div100">
-      <div id="header-wrapper">
-        <table id="tbl100">
-          <thead id="hed100">
-            <tr id="tr100"></tr>
-          </thead>
-          <tbody id="bdy100"></tbody>
-        </table>
-      </div>
-    </div>
-    <div id="table-label">
-      <label for="debug-div">Debug Information Table</label><br />
-    </div>
-    <div id="debug-div">
-      <table id="debug-head">
-        <thead>
-          <tr id="debug-row">
-            <th>Turn</th>
-            <th>PGN/SAN</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Piece</th>
-            <th>Color</th>
-            <th>xPiece</th>
-            <th id="FEN">FEN</th>
-          </tr>
+  </div>
+  <div id="table-label">
+    <label for="div100">XFEN Array Table</label><br />
+  </div>
+  <div id="div100">
+    <div id="header-wrapper">
+      <table id="tbl100">
+        <thead id="hed100">
+          <tr id="tr100"></tr>
         </thead>
-        <tbody id="debug-body">
-          <!-- The table body will be populated dynamically -->
-        </tbody>
+        <tbody id="bdy100"></tbody>
       </table>
     </div>
-  </body>
+  </div>
+  <div id="table-label">
+    <label for="debug-div">Debug Information Table</label><br />
+  </div>
+  <div id="debug-div">
+    <table id="debug-head">
+      <thead>
+        <tr id="debug-row">
+          <th>Turn</th>
+          <th>PGN/SAN</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Piece</th>
+          <th>Color</th>
+          <th>xPiece</th>
+          <th id="FEN">FEN</th>
+        </tr>
+      </thead>
+      <tbody id="debug-body">
+        <!-- The table body will be populated dynamically -->
+      </tbody>
+    </table>
+  </div>
+  
+
+
+  <!-- JavaScript for sample PGNs box -->
+  <script>
+    function copyToClipboard(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+  
+    document.addEventListener("DOMContentLoaded", function () {
+      const listItems = document.querySelectorAll("#pgn-list li");
+      const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
+  
+      const tooltip = document.createElement("span");
+      tooltip.classList.add("custom-tooltip");
+      document.body.appendChild(tooltip); // Append the tooltip element to the body
+  
+      listItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          // Remove the highlight from any previously selected item
+          const selected = document.querySelector(".selected");
+          if (selected) {
+            selected.classList.remove("selected");
+          }
+  
+          // Add the highlight to the clicked item
+          item.classList.add("selected");
+  
+          // Show the "copied!" alert
+          copyAlert.textContent = "Copied!";
+          copyAlert.classList.add("show");
+  
+          // Copy the content to clipboard
+          const textToCopy = item.textContent.trim();
+          copyToClipboard(textToCopy);
+  
+          // Set the tooltip text to the full content of the <li> element
+          tooltip.textContent = textToCopy;
+  
+          // After a delay, remove the copy alert tooltip
+          setTimeout(() => {
+            copyAlert.textContent = "";
+            copyAlert.classList.remove("show");
+          }, 1500); // Adjust the delay (in milliseconds) as needed
+        });
+      });
+    });
+  </script>
+</body>
+
 </html>
