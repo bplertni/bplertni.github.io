@@ -85,18 +85,16 @@ th {
   display: block;
   font-size: 10px;
   line-height: 1.2;
-  z-index: -1
+  z-index: 0
 }
 
 thead {
   background-color: lightgrey;
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 
-thead tr {
-    background-color: lightgrey;
-}
 
 tbody {
   margin-top: 100px;
@@ -129,7 +127,7 @@ tbody {
 
 /* Styles for the list items */
 ul  {
-  padding-inline-start: 15px;
+  padding-inline-start: 5px;
   padding-right: 5px;
 }
 #pgn-list li {
@@ -175,4 +173,12 @@ li:hover .custom-tooltip {
 #JSONTextArea {
   height: 225px;
   width: 400px;
+}
+
+.move-to {
+  background-color:  #66a3cc ;
+}
+
+.move-from {
+  background-color: lightcoral;
 }

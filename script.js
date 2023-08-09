@@ -424,10 +424,8 @@ function processChessGame() {
   debugBody.innerHTML = "";
 
   // Code Tester
-
   console.log("JSON Objects: ");
-  console.log(JSON.stringify(currentChessGame));
-  console.log(currentChessGame.xfens);
+  console.log(currentChessGame.moves[2]["to"]);
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
@@ -450,6 +448,7 @@ function processChessGame() {
       cell.setAttribute("id", "xx-cell");
       conts = "xx"; // Add 'xx' column to the header
     }
+    cell.setAttribute("class", "header")
     cell.innerHTML = conts;
   }
 
@@ -458,7 +457,7 @@ function processChessGame() {
     row = tbl.insertRow();
     cell = row.insertCell();
     cell.innerHTML = i.toString();
-    for (cd = 0; cd <= 64; cd++) {
+    for (cd = 0; cd <= 64; cd++) {   
       cell = row.insertCell();
       if (cd == 64) {
         // Add captured pieces into 'xx' colum
@@ -466,6 +465,16 @@ function processChessGame() {
       } else {
         conts = currentChessGame.xfens[i][cd];
         cell.innerHTML = formatCells(conts);
+      }
+
+
+      if (i > 0 && cd == squareCode2Idx(currentChessGame.moves[i]["to"])) { // highlights "to" cells
+        console.log("Moved to: " + currentChessGame.moves[i]["to"])
+        cell.setAttribute("class", "move-to")
+      }
+      if ((i < currentChessGame.xfens.length - 1) && cd == squareCode2Idx(currentChessGame.moves[i + 1]["from"])) { // highlights "from" cells
+        console.log("Moved to: " + currentChessGame.moves[i + 1]["from"])
+        cell.setAttribute("class", "move-from")
       }
     }
   }
@@ -509,7 +518,8 @@ function exportChessGame() {
   let pgn = validatePGN();
   let currentChessGame = new ChessGame(pgn);
   let jsonOut = document.getElementById("JSONTextArea")
-  jsonOut.innerHTML = JSON.stringify(currentChessGame.xfens)
+  console.log("exporting: " + JSON.stringify(currentChessGame))
+  return JSON.stringify(currentChessGame)
 }
 
 
