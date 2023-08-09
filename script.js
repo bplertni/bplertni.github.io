@@ -408,6 +408,11 @@ function clearTables() {
   tr.innerHTML = "";
   let debugBody = document.getElementById("debug-body");
   debugBody.innerHTML = "";
+
+  const pgnTextArea = document.getElementById("pgnTextArea");
+  const jsonTextArea = document.getElementById("JSONTextArea");
+  pgnTextArea.value = "";
+  jsonTextArea.value = "";
 }
 
 // Process information into debug tables

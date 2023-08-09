@@ -188,10 +188,10 @@
 
         // Paste the selected content into the pgnTextArea and jsonTextArea
         pgnTextArea.value = textToCopy;
-        
-        // Activate Button
-        processChessGame();
         jsonTextArea.value = exportChessGame();
+        
+        // Press 'submit' button
+        processChessGame();
 
         // After a delay, remove the copy alert tooltip
         setTimeout(() => {
@@ -202,13 +202,6 @@
     });
   });
 </script>
-This version of the script should correctly paste the selected content into both the pgnTextArea and the JSONTextArea elements, allowing the content to be displayed in the HTML as expected.
-
-
-
-
-
-
 </body>
 
 </html>
