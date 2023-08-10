@@ -348,28 +348,28 @@ function ChessGame(ipgn) {
     let promotedXPiece = "";
 
     if ("captured" in this.history[i] && "promotion" in this.history[i]) {
-      promotedXPiece = this.xfens[i][fromIndex];
-      capturedXPiece = this.xfens[i][toIndex];
-      if (DEUBG_FLAG) {
+      promotedXPiece = this.xfens[i - 1][fromIndex];
+      capturedXPiece = this.xfens[i - 1][toIndex];
+      if (DEBUG_FLAG) {
         console.log(
           promotedXPiece +
             " captured " +
             capturedXPiece +
             " and was promoted at move " +
-            (i + 1)
+            (i)
         );
       }
       output = promotedXPiece + ", " + capturedXPiece;
     } else if ("promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i][fromIndex];
       if (DEBUG_FLAG) {
-        console.log(promotedXPiece + " was promoted at move " + (i + 1));
+        console.log(promotedXPiece + " was promoted at move " + (i));
       }
       output = promotedXPiece;
     } else if ("captured" in this.history[i]) {
-      capturedXPiece = this.xfens[i][toIndex];
+      capturedXPiece = this.xfens[i - 1][toIndex];
       if (DEBUG_FLAG) {
-        console.log(capturedXPiece + " was captured at move " + (i + 1));
+        console.log(capturedXPiece + " was captured at move " + (i));
       }
       output = capturedXPiece;
     } else {
