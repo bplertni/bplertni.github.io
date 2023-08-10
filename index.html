@@ -148,6 +148,10 @@
     document.body.removeChild(textarea);
   }
 
+  function formatPGN(pgn) { // Use regex to replace 2 or more white spaces with 1 white space
+    return pgn.replace(/\s{2,}/g, ' ');
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const listItems = document.querySelectorAll("#pgn-list li");
     const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
@@ -180,7 +184,8 @@
         copyAlert.classList.add("show");
 
         // Copy the content to clipboard
-        const textToCopy = item.textContent.trim();
+        let textToCopy = item.textContent.trim();
+        textToCopy = formatPGN(textToCopy)
         copyToClipboard(textToCopy);
 
         // Set the tooltip text to the full content of the <li> element
