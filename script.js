@@ -126,7 +126,7 @@ function ChessGame(ipgn) {
   this.efens = []; // expanded fens as an array with full spaces as '.'
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
   this.moves = [""]; // pgn part for each position
-  this.captured = [""]; // array, indexed by turn/ply indicating what was captured or promoted
+  this.removed = [""]; // array, indexed by turn/ply indicating what was captured or promoted
   this.history = []; // verbose history returned by chess.js.history
 
   // workers used in the construction of the ChessGame object
@@ -375,7 +375,7 @@ function ChessGame(ipgn) {
     } else {
       output = "";
     }
-    this.captured.push(output);
+    this.removed.push(output);
   }
 
   if (DEBUG_FLAG) {
@@ -460,7 +460,7 @@ function processChessGame() {
       cell = row.insertCell();
       if (cd == 64) {
         // Add captured pieces into 'xx' colum
-        cell.innerHTML = formatCells(currentChessGame.captured[i]);
+        cell.innerHTML = formatCells(currentChessGame.removed[i]);
       } else {
         conts = currentChessGame.xfens[i][cd];
         cell.innerHTML = formatCells(conts);
