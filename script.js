@@ -126,7 +126,6 @@ function ChessGame(ipgn) {
   this.efens = []; // expanded fens as an array with full spaces as '.'
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
   this.moves = [""]; // pgn part for each position
-  this.moved = []; // true/false for a given square to indicate if it's piece has moved
   this.captured = [""]; // array, indexed by turn/ply indicating what was captured or promoted
   this.history = []; // verbose history returned by chess.js.history
 
@@ -162,11 +161,6 @@ function ChessGame(ipgn) {
     console.log(chess2.ascii());
   }
 
-  // setup the moved array, each move/turn this array is copied forward
-  // and updated with the current move(s)
-  let arr = Array(64).fill(false);
-  this.moved.push(arr);
-
   //let ltest = chess1.history( {verbose: true} ) ;
   //if (DEBUG_FLAG) { console.log(  ltest ); }
 
@@ -181,9 +175,7 @@ function ChessGame(ipgn) {
     this.efens.push(efen);
     return chess2.fen();
   });
-  if (DEBUG_FLAG) {
-    console.log(this.fens);
-  }
+
   let local_ix = 0; //this aligns with the TURN/PLY but starts at 0
   // ====================================================================================
   // =====  walk the game history again to get to:, fr:, and san: detail
@@ -216,27 +208,17 @@ function ChessGame(ipgn) {
     // }
 
     efen = this.efens[local_ix];
-    if (DEBUG_FLAG) {
-      console.log(map_obj);
-    }
-    //if (DEBUG_FLAG) {  console.log( xfen_prev ); }
 
     // make a deep copy of the xfen_p to modify
     xfen_curr = JSON.parse(JSON.stringify(xfen_prev));
 
-    // if (DEBUG_FLAG) {  console.log( xfen_curr ); }
     // square by square blank out any that are now '.'
     for (ix = 0; ix < 64; ix++) {
       if (this.efens[local_ix][ix] == ".") {
         xfen_curr[ix] = ".";
       }
     }
-    if (DEBUG_FLAG) {
-      console.log(efen);
-    }
-    //if (DEBUG_FLAG) {  console.log( 'cur xfen : ', xfen_curr ); }
-    //if (DEBUG_FLAG) {  console.log( display_xfen_debug( xfen_curr) ); }
-
+  
     let lpiece = map_obj.piece.toLowerCase();
     let ppiece = ""; // have both lpiece and ppiece because ppiece is the piece prior to promo
     let lfrom = map_obj.from.toLowerCase();
@@ -303,7 +285,6 @@ function ChessGame(ipgn) {
           if (promo == true) {
             //handle numbering the newly promoted piece
             promoted = lsan.split("=")[1][0];
-            console.log(promoted);
             promoted = promoted.concat(
               numberNewPiece(xfen_prev[from_square_ix][2])
             );
@@ -351,8 +332,13 @@ function ChessGame(ipgn) {
     return map_obj;
   });
 
+  // Sync indices, so idx 1 = first move
+  this.fens.unshift("");
+  this.efens.unshift("");
+  this.history.unshift("");
+  
   // Make an array storing all the captured/promoted pieces; had to be done due to desynchronization of history and xfens
-  for (let i = 0; i < this.history.length; i++) {
+  for (let i = 1; i < this.history.length; i++) {
     let output = "";
     let toSquare = this.history[i]["to"];
     let fromSquare = this.history[i]["from"];
@@ -364,21 +350,27 @@ function ChessGame(ipgn) {
     if ("captured" in this.history[i] && "promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i][fromIndex];
       capturedXPiece = this.xfens[i][toIndex];
-      console.log(
-        promotedXPiece +
-          " captured " +
-          capturedXPiece +
-          " and was promoted at move " +
-          (i + 1)
-      );
+      if (DEUBG_FLAG) {
+        console.log(
+          promotedXPiece +
+            " captured " +
+            capturedXPiece +
+            " and was promoted at move " +
+            (i + 1)
+        );
+      }
       output = promotedXPiece + ", " + capturedXPiece;
     } else if ("promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i][fromIndex];
-      console.log(promotedXPiece + " was promoted at move " + (i + 1));
+      if (DEBUG_FLAG) {
+        console.log(promotedXPiece + " was promoted at move " + (i + 1));
+      }
       output = promotedXPiece;
     } else if ("captured" in this.history[i]) {
       capturedXPiece = this.xfens[i][toIndex];
-      console.log(capturedXPiece + " was captured at move " + (i + 1));
+      if (DEBUG_FLAG) {
+        console.log(capturedXPiece + " was captured at move " + (i + 1));
+      }
       output = capturedXPiece;
     } else {
       output = "";
@@ -429,8 +421,10 @@ function processChessGame() {
   debugBody.innerHTML = "";
 
   // Code Tester
-  console.log("JSON Objects: ");
-  console.log(currentChessGame.moves[2]["to"]);
+  if (DEBUG_FLAG) {
+    console.log("JSON Objects: ");
+    console.log(currentChessGame.moves[2]["to"]);
+  }
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
@@ -474,23 +468,21 @@ function processChessGame() {
 
 
       if (i > 0 && cd == squareCode2Idx(currentChessGame.moves[i]["to"])) { // highlights "to" cells
-        console.log("Moved to: " + currentChessGame.moves[i]["to"])
         cell.setAttribute("class", "move-to")
       }
       if ((i < currentChessGame.xfens.length - 1) && cd == squareCode2Idx(currentChessGame.moves[i + 1]["from"])) { // highlights "from" cells
-        console.log("Moved to: " + currentChessGame.moves[i + 1]["from"])
         cell.setAttribute("class", "move-from")
       }
     }
   }
 
   // Iterate through the arrays and populate each column
-  for (let i = 0; i < currentChessGame.history.length; i++) {
+  for (let i = 1; i < currentChessGame.history.length; i++) {
     // Create a new row
     const newRow = debugBody.insertRow();
 
     const turnCell = newRow.insertCell();
-    turnCell.textContent = i + 1;
+    turnCell.textContent = i;
 
     const pgnCell = newRow.insertCell();
     pgnCell.textContent = currentChessGame.history[i]["san"]; // Access each move's history object, access "to" key, get PGN of the turn
@@ -509,7 +501,7 @@ function processChessGame() {
 
     const xPieceCell = newRow.insertCell();
     let xPiecePos = squareCode2Idx(toCell.textContent); //Use "to" cell square code, get index, use index to get xpiece in xfens
-    xPieceCell.textContent = currentChessGame.xfens[i + 1][xPiecePos]; // i + 1 because first index of xfens is a starting config of chessboard.
+    xPieceCell.textContent = currentChessGame.xfens[i][xPiecePos];
 
     const fenCell = newRow.insertCell();
     fenCell.textContent = currentChessGame.fens[i];
@@ -522,7 +514,7 @@ function processChessGame() {
 function exportChessGame() {
   let pgn = validatePGN();
   let currentChessGame = new ChessGame(pgn);
-  let jsonOut = document.getElementById("JSONTextArea")
+  let jsonOut = document.getElementById("JSONTextArea") // Will be used for exporting to Python Server
   console.log("exporting: " + JSON.stringify(currentChessGame))
   return JSON.stringify(currentChessGame)
 }
