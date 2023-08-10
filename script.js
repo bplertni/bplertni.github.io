@@ -359,7 +359,7 @@ function ChessGame(ipgn) {
             (i)
         );
       }
-      output = promotedXPiece + ", " + capturedXPiece;
+      output = formatCells(promotedXPiece) + ", " + formatCells(capturedXPiece);
     } else if ("promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i][fromIndex];
       if (DEBUG_FLAG) {
@@ -515,6 +515,7 @@ function exportChessGame() {
   let pgn = validatePGN();
   let currentChessGame = new ChessGame(pgn);
   let jsonOut = document.getElementById("JSONTextArea") // Will be used for exporting to Python Server
+  jsonOut.value = JSON.stringify(currentChessGame)
   console.log("exporting: " + JSON.stringify(currentChessGame))
   return JSON.stringify(currentChessGame)
 }
