@@ -52,6 +52,10 @@ function formatCells(cell_content) {
   }
 }
 
+function cleanTagPairs(pgn_tagpairs) {
+  return pgn_tagpairs.map(element => element.replace(/(\r\n|\n|\r)/gm, ""));
+}
+
 function display_xfen_debug(xfen) {
   // display xfen information in a consistant manner for debugging only
   let xpand = "";
@@ -116,16 +120,24 @@ function fen2array(ifen) {
 //   When created this object digests a PGN and populates a series of arrays that
 //   are indexed by the game turn/ply
 function ChessGame(ipgn) {
-  if (ipgn == null) {
+  
+  // ipgn = input PGN ; tpgn = trimmed PGN
+
+  let tpgn = ipgn.trim()
+
+  if (tpgn == null) {
     alert("Invalid Format");
     return null;
   }
 
-  this.pgn = ipgn; // expect a validated pgn but should validate anyway
+  const tagpairsRegex = /\[([^\[\]]|\n)*?\]/g; // Regex that matches lines that start and end with square brackets
+  this.pgn_movetext = tpgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '');
+  let raw_tagpairs = tpgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
+  this.pgn_tagpairs = cleanTagPairs(raw_tagpairs)
+
   this.fens = []; // holding the fens from the digested pgn
   this.efens = []; // expanded fens as an array with full spaces as '.'
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
-  this.moves = [""]; // pgn part for each position
   this.removed = [""]; // array, indexed by turn/ply indicating what was captured or promoted
   this.history = []; // verbose history returned by chess.js.history
 
@@ -145,7 +157,7 @@ function ChessGame(ipgn) {
   let ascii = "";
 
   // =====  initialize the worker objects  =====
-  chess1.load_pgn(ipgn);
+  chess1.load_pgn(tpgn);
   chess2.load_pgn("");
 
   // the JSON syntax here is for doing a DEEP copy of an array of strings
@@ -194,13 +206,6 @@ function ChessGame(ipgn) {
         map_obj.san
       );
     }
-    this.moves.push({
-      san: map_obj.san,
-      color: map_obj.color,
-      piece: map_obj.piece,
-      from: map_obj.from,
-      to: map_obj.to,
-    });
 
     // let sanTest = map_obj.san.toLowerCase()
     // if (sanTest.includes('o-o')) {
@@ -359,7 +364,7 @@ function ChessGame(ipgn) {
             (i)
         );
       }
-      output = formatCells(promotedXPiece) + ", " + formatCells(capturedXPiece);
+      output = promotedXPiece + ", " + capturedXPiece;
     } else if ("promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i][fromIndex];
       if (DEBUG_FLAG) {
@@ -421,10 +426,6 @@ function processChessGame() {
   debugBody.innerHTML = "";
 
   // Code Tester
-  if (DEBUG_FLAG) {
-    console.log("JSON Objects: ");
-    console.log(currentChessGame.moves[2]["to"]);
-  }
 
   let tbl = document.getElementById("bdy100");
   let trHeader = document.getElementById("tr100");
@@ -461,16 +462,20 @@ function processChessGame() {
       if (cd == 64) {
         // Add captured pieces into 'xx' colum
         cell.innerHTML = formatCells(currentChessGame.removed[i]);
+        if (currentChessGame.removed[i].length == 8) {
+          let pieces = currentChessGame.removed[i].split(", ");
+          cell.innerHTML = formatCells(pieces[0]) + ", " + formatCells(pieces[1]);
+        }
       } else {
         conts = currentChessGame.xfens[i][cd];
         cell.innerHTML = formatCells(conts);
       }
 
 
-      if (i > 0 && cd == squareCode2Idx(currentChessGame.moves[i]["to"])) { // highlights "to" cells
+      if (i > 0 && cd == squareCode2Idx(currentChessGame.history[i]["to"])) { // highlights "to" cells
         cell.setAttribute("class", "move-to")
       }
-      if ((i < currentChessGame.xfens.length - 1) && cd == squareCode2Idx(currentChessGame.moves[i + 1]["from"])) { // highlights "from" cells
+      if ((i < currentChessGame.xfens.length - 1) && cd == squareCode2Idx(currentChessGame.history[i + 1]["from"])) { // highlights "from" cells
         cell.setAttribute("class", "move-from")
       }
     }
