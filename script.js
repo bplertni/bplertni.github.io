@@ -21,6 +21,22 @@ const squareXlat = [
 
 // ====================================================================================================================
 // Helper Functions
+function findDifferences(before, after) {
+  if (before.length !== after.length) {
+    throw new Error('Both arrays must have the same length');
+  }
+
+  let differences = [];
+
+  for (let i = 0; i < before.length; i++) {
+    if (before[i] == after[i]) {
+      continue
+    } else {
+      differences.push(i + ": " + before[i] + ", " + after[i])
+    }
+  }
+  return differences;
+}
 
 function validatePGN() {
   var inputPGN = document.getElementById("pgnTextArea").value;
@@ -165,16 +181,6 @@ function ChessGame(ipgn) {
   xfen_prev = JSON.parse(JSON.stringify(XFEN_START));
   this.xfens.push(xfen_prev); //push the starting efens array into the efens array
 
-  // need to ensure that all of arrays in this object have the same starting index of 0 or 1
-  // in order to align their data
-  // =====#####=====  debugging info, show starting pos  =====#####=====
-  if (DEBUG_FLAG) {
-    console.log(posIdx, chess2.fen());
-    console.log(chess2.ascii());
-  }
-
-  //let ltest = chess1.history( {verbose: true} ) ;
-  //if (DEBUG_FLAG) { console.log(  ltest ); }
 
   // ====================================================================================
   // #####     the first pass over history just to get all FEN information
@@ -193,6 +199,7 @@ function ChessGame(ipgn) {
   // =====  walk the game history again to get to:, fr:, and san: detail
   // =====  and also to expand the fens to xfens which includes colors and numbers
   // ====================================================================================
+
   this.history = chess1.history({ verbose: true }).map((map_obj) => {
     if (DEBUG_FLAG) {
       console.log("turn : ", local_ix + 1);
@@ -259,6 +266,7 @@ function ChessGame(ipgn) {
       // and if the square we wound up on was empty previously
       if (xfen_prev[squareCode2Idx(lto)] == ".") {
         enpass = true;
+        map_obj.enpass = true;
         // need to determine which pawn was captured, or just know that it is now gone
         // since it will be removed from the board 3D array by the updates
       }
@@ -342,7 +350,7 @@ function ChessGame(ipgn) {
   this.efens.unshift("");
   this.history.unshift("");
   
-  // Make an array storing all the captured/promoted pieces; had to be done due to desynchronization of history and xfens
+  // Make an array storing all the captured/promoted pieces
   for (let i = 1; i < this.history.length; i++) {
     let output = "";
     let toSquare = this.history[i]["to"];
@@ -355,43 +363,39 @@ function ChessGame(ipgn) {
     if ("captured" in this.history[i] && "promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i - 1][fromIndex];
       capturedXPiece = this.xfens[i - 1][toIndex];
+      output = promotedXPiece + ", " + capturedXPiece;
       if (DEBUG_FLAG) {
         console.log(
           promotedXPiece +
             " captured " +
             capturedXPiece +
             " and was promoted at move " +
-            (i)
+            i
         );
       }
-      output = promotedXPiece + ", " + capturedXPiece;
     } else if ("promotion" in this.history[i]) {
-      promotedXPiece = this.xfens[i][fromIndex];
-      if (DEBUG_FLAG) {
-        console.log(promotedXPiece + " was promoted at move " + (i));
-      }
+      promotedXPiece = this.xfens[i - 1][fromIndex];
       output = promotedXPiece;
+      if (DEBUG_FLAG) {
+        console.log(promotedXPiece + " was promoted at move " + i);
+      }
+    } else if ("enpass" in this.history[i]) {
+      enpassToIndex = squareCode2Idx(this.history[i - 1]["to"])   // Get 'to' square-index of the previous pawn piece that will be en passant'ed 
+      capturedXPiece = this.xfens[i - 1][enpassToIndex]
+      output = capturedXPiece;
+      if (DEBUG_FLAG) {
+        console.log(capturedXPiece + " was captured via en passant at move " + i)
+      }
     } else if ("captured" in this.history[i]) {
       capturedXPiece = this.xfens[i - 1][toIndex];
-      if (DEBUG_FLAG) {
-        console.log(capturedXPiece + " was captured at move " + (i));
-      }
       output = capturedXPiece;
+      if (DEBUG_FLAG) {
+        console.log(capturedXPiece + " was captured at move " + i);
+      }
     } else {
       output = "";
     }
     this.removed.push(output);
-  }
-
-  if (DEBUG_FLAG) {
-    for (ix = 0; ix < this.xfens.length; ix++) {
-      console.log(this.xfens[ix]);
-      for (ir = 0; ir < 8; ir++) {
-        console.log(this.xfens[ix].slice(ir * 8, (ir + 1) * 8));
-      }
-    }
-    let json_xfens = JSON.stringify(this.xfens);
-    console.log(json_xfens);
   }
 }
 
@@ -521,10 +525,8 @@ function exportChessGame() {
   let currentChessGame = new ChessGame(pgn);
   let jsonOut = document.getElementById("JSONTextArea") // Will be used for exporting to Python Server
   jsonOut.value = JSON.stringify(currentChessGame)
-  console.log("exporting: " + JSON.stringify(currentChessGame))
+  console.log("exporting: \n" + JSON.stringify(currentChessGame))
   return JSON.stringify(currentChessGame)
 }
-
-
 
 
