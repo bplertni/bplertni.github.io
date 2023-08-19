@@ -152,7 +152,7 @@ function ChessGame(ipgn) {
   this.pgn_tagpairs = cleanTagPairs(raw_tagpairs)
 
   this.fens = []; // holding the fens from the digested pgn
-  this.efens = []; // expanded fens as an array with full spaces as '.'
+  let efens = []; // expanded fens as an array with full spaces as '.'
   this.xfens = []; // expanded fens as array with colors and piece numbers 'wp4'
   this.removed = [""]; // array, indexed by turn/ply indicating what was captured or promoted
   this.history = []; // verbose history returned by chess.js.history
@@ -190,7 +190,7 @@ function ChessGame(ipgn) {
     chess2.move(move);
     fen = chess2.fen;
     efen = fen2array(chess2.fen());
-    this.efens.push(efen);
+    efens.push(efen);
     return chess2.fen();
   });
 
@@ -219,14 +219,14 @@ function ChessGame(ipgn) {
     //   debugger
     // }
 
-    efen = this.efens[local_ix];
+    efen = efens[local_ix];
 
     // make a deep copy of the xfen_p to modify
     xfen_curr = JSON.parse(JSON.stringify(xfen_prev));
 
     // square by square blank out any that are now '.'
     for (ix = 0; ix < 64; ix++) {
-      if (this.efens[local_ix][ix] == ".") {
+      if (efens[local_ix][ix] == ".") {
         xfen_curr[ix] = ".";
       }
     }
@@ -347,7 +347,6 @@ function ChessGame(ipgn) {
 
   // Sync indices, so idx 1 = first move
   this.fens.unshift("");
-  this.efens.unshift("");
   this.history.unshift("");
   
   // Make an array storing all the captured/promoted pieces
