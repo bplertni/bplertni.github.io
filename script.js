@@ -46,6 +46,7 @@ function validatePGN() {
   if (isValidPGN) {
     return inputPGN;
   } else {
+    alert("Invalid Format");
     return null;
   }
 }
@@ -136,20 +137,18 @@ function fen2array(ifen) {
 //   When created this object digests a PGN and populates a series of arrays that
 //   are indexed by the game turn/ply
 function ChessGame(ipgn) {
-  
-  // ipgn = input PGN ; tpgn = trimmed PGN
 
-  let tpgn = ipgn.trim()
-
-  if (tpgn == null) {
-    alert("Invalid Format");
+  if (ipgn == null) {
     return null;
   }
+  
+  // ipgn = input PGN ; tpgn = trimmed PGN
+  console.log("ipgn: " + ipgn);
+  let tpgn = ipgn.trim()
 
-  const tagpairsRegex = /\[([^\[\]]|\n)*?\]/g; // Regex that matches lines that start and end with square brackets
+  const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
   this.pgn_movetext = tpgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '');
-  let raw_tagpairs = tpgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
-  this.pgn_tagpairs = cleanTagPairs(raw_tagpairs)
+  this.pgn_tagpairs = tpgn.match(tagpairsRegex).map(elem => elem.replaceAll("\"", '\'')) || []; // If no tagpair in PGN, return empty array
 
   this.fens = []; // holding the fens from the digested pgn
   let efens = []; // expanded fens as an array with full spaces as '.'
