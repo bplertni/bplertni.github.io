@@ -148,7 +148,12 @@ function ChessGame(ipgn) {
 
   const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
   this.pgn_movetext = tpgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '');
-  this.pgn_tagpairs = tpgn.match(tagpairsRegex).map(elem => elem.replaceAll("\"", '\'')) || []; // If no tagpair in PGN, return empty array
+  let raw_tagpairs = tpgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
+  if (raw_tagpairs != []) {
+    this.pgn_tagpairs = raw_tagpairs.map(elem => elem.replaceAll("\"", '\''))
+  } else {
+    this.pgn_tagpairs = [];
+  }
 
   this.fens = []; // holding the fens from the digested pgn
   let efens = []; // expanded fens as an array with full spaces as '.'
