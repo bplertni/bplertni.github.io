@@ -1,4 +1,5 @@
 const DEBUG_FLAG = false;
+let globalChessGame = null;
 const XFEN_START = [ 'br1', 'bn1', 'bb1', 'bq1', 'bk1', 'bb2', 'bn2', 'br2' ,     
                      'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8' ,
                      '.',   '.',   '.',   '.',   '.',   '.',   '.',   '.' ,  
@@ -143,14 +144,13 @@ function ChessGame(ipgn) {
   }
   
   // ipgn = input PGN ; tpgn = trimmed PGN
-  console.log("ipgn: " + ipgn);
   let tpgn = ipgn.trim()
 
   const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
   this.pgn_movetext = tpgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '');
   let raw_tagpairs = tpgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
   if (raw_tagpairs != []) {
-    this.pgn_tagpairs = raw_tagpairs.map(elem => elem.replaceAll("\"", '\''))
+    this.pgn_tagpairs = raw_tagpairs.map(elem => elem.replaceAll("\"", '`'))
   } else {
     this.pgn_tagpairs = [];
   }
@@ -275,6 +275,7 @@ function ChessGame(ipgn) {
         // since it will be removed from the board 3D array by the updates
       }
     }
+
 
     // ==============================================================================
     // #####     build the current xfen using the prior xfen,
@@ -417,12 +418,15 @@ function clearTables() {
   const jsonTextArea = document.getElementById("JSONTextArea");
   pgnTextArea.value = "";
   jsonTextArea.value = "";
+
+  globalChessGame = null;
 }
 
 // Process information into debug tables
 function processChessGame() {
   let pgn = validatePGN();
   let currentChessGame = new ChessGame(pgn);
+  globalChessGame = currentChessGame;
 
   // Clear XFEN and Debug table header/row to prevent duplication
   let tbody = document.getElementById("bdy100");
@@ -524,12 +528,14 @@ function processChessGame() {
 
 //  Export chess game into JSON
 function exportChessGame() {
-  let pgn = validatePGN();
-  let currentChessGame = new ChessGame(pgn);
+  if (globalChessGame == null) {
+    alert("Please press submit before exporting.")
+    return null;
+  }
   let jsonOut = document.getElementById("JSONTextArea") // Will be used for exporting to Python Server
-  jsonOut.value = JSON.stringify(currentChessGame)
-  console.log("exporting: \n" + JSON.stringify(currentChessGame))
-  return JSON.stringify(currentChessGame)
+  jsonOut.value = JSON.stringify(globalChessGame)
+  console.log("exporting: \n" + JSON.stringify(globalChessGame))
+  return JSON.stringify(globalChessGame)
 }
 
 

@@ -193,10 +193,10 @@
 
         // Paste the selected content into the pgnTextArea and jsonTextArea
         pgnTextArea.value = textToCopy;
-        jsonTextArea.value = exportChessGame();
         
-        // Press 'submit' button
+        // Press 'submit' then 'export' button
         processChessGame();
+        jsonTextArea.value = exportChessGame();
 
         // After a delay, remove the copy alert tooltip
         setTimeout(() => {
