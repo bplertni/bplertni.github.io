@@ -20,36 +20,122 @@ const squareXlat = [
     'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'   // 
    ];  
 
+// Sample PGN list
+const samplePGN = `
+[Event "Simple PGN"]
+[xtraDet "Sample PGN"]
+
+1. e4 f6 { B00 Barnes Defense } 2. Qh5+ g6 3. Qd1 { Black resigns. } 1-0
+
+[Event "Problematic PGN with "." for xPiece at Turn 31"]
+[xtraDet "Sample PGN"]
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. a3 Nf6 5. d3 O-O 6. h3 d6 7. Nc3
+Nd4 8. Na4 Bb6 9. Nxb6 axb6 10. Ba2 Qe7 11. Be3 c5 12. c3 Ne6 13.
+Qd2 h6 14. g4 g5 15. O-O-O Nf4 16. Rdg1 Rd8 17. h4 Kf8 18. hxg5 hxg5
+19. Nxg5 Ke8 20. Bxf4 exf4 21. Bxf7+ Kd7 22. Qxf4 Kc6 23. Rh6 Nd7
+24. Bd5+ Kb5 25. Rxd6 Rf8 26. Bc4+ Ka5 27. Rxd7 Bxd7 28. Qd2 b5 29.
+b4+ cxb4 30. cxb4+ Kb6 31. Qe3+ Kc7 32. Bd5 Rxa3 33. Qd2 Ra1+ 34.
+Kb2 Rxg1 35. Qc3+ Kb8 0-1
+
+[Event "PGN with Enpassant and Promotion to Rook"]
+[xtraDet "Sample PGN"]
+1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 b5 6. Bxb5 Qxd5 7.
+Nxf7 Qxg2 8. Bxc6+ Qxc6 9. Nxh8 Qxh1+ 10. Ke2 Qe4+ 11. Kf1 Bh3+ 12.
+Kg1 O-O-O 13. f3 Qb7 14. a4 Qxf3 15. Qxf3 Bd6 16. b4 Be6 17. d3 g6
+18. Qc6 h5 19. b5 a5 20. bxa6 {enpass} g5 21. a7 g4 22. a8=R# {promo
+to R with mate} 1-0
+
+[Event "PGN from https://lichess.org/8fxcty8B"]
+[xtraDet "Sample PGN"]
+1. e4 e5 2. Nf3 b5 3. Bd3 b4 4. O-O g6 5. c4 bxc3 6. dxc3 Bg7 7. Na3
+Ne7 8. b4 O-O 9. Nc4 d6 10. Ncxe5 dxe5 11. a4 Nbc6 12. Be3 Bg4 13.
+Be2 Bxf3 14. Bxf3 Qxd1 15. Raxd1 Rfd8 16. Rxd8+ Rxd8 17. Bxa7 Ra8
+18. Bc5 Bf8 19. a5 f5 20. Bxe7 Bxe7 21. h4 fxe4 22. Bxe4 Nd8 23.
+Bxa8 c5 24. bxc5 Bxc5 25. Bd5+ Kg7 26. a6 Nf7 27. a7 Nh6 28. a8=N e4
+29. c4 e3 30. Nc7 e2 31. Nb5 exf1=Q+ 32. Kh2 Qxf2 33. Nd6 Bxd6+ 34.
+Kh3 Qg3# { Black wins by checkmate. } 0-1
+
+[Event "PGN from https://lichess.org/7hQ58J9X#123"]
+[xtraDet "Sample PGN"]
+1. e4 c6 2. d4 d5 3. exd5 cxd5 4. c4 Nf6 5. Nf3 e6 6. Nc3 Nc6 7. c5
+Be7 8. Bb5 O-O 9. Bxc6 bxc6 10. b4 a5 11. b5 cxb5 12. Nxb5 Ba6 13.
+a4 Ne4 14. Qc2 f5 15. O-O Bf6 16. Rd1 Rb8 17. Bd2 Bxb5 18. axb5 Rxb5
+19. Rdb1 Qd7 20. Rxb5 Qxb5 21. Rxa5 Qe2 22. Ra1 Qxf2+ 23. Kh1 Nxd2
+24. Qxd2 Qxd2 25. Nxd2 Bxd4 26. Rc1 Be3 27. Rc2 Bxd2 28. Rxd2 Rc8
+29. Rc2 Rc6 30. Kg1 Kf7 31. Kf2 e5 32. Ke3 Ke6 33. Kd3 Rc8 34. g3
+Kd7 35. Rf2 g6 36. Rc2 Kc6 37. Ra2 Rb8 38. Ra6+ Kxc5 39. Ra7 Rb3+
+40. Kc2 Rf3 41. Rxh7 Rf2+ 42. Kb3 Kd4 43. Rg7 e4 44. Rxg6 e3 45. Re6
+e2 46. Kb4 Kd3 47. Kc5 d4 48. Kd5 Rf1 49. Re5 e1=Q 50. Rxe1 Rxe1 51.
+h4 Re4 52. h5 Ke3 53. g4 Re8 54. gxf5 d3 55. Kd6 d2 56. Kd7 d1=Q+
+57. Kxe8 Qd5 58. f6 Qe5+ 59. Kf7 Qxh5+ 60. Kg7 Qe5 61. Kg6 Qxf6+ 62.
+Kxf6 1/2-1/2
+
+[Event "PGN: Black Queen-side Castling (O-O-O), then rook moves (Example 1)"]
+[xtraDet "Sample PGN"]
+1. e4 d6 { B00 Pirc Defense } 2. Qh5 Qd7 3. h3 Qe6 4. Be2 Bd7 5. b3
+Nc6 6. d3 O-O-O 7. Qg5 Re8 8. Bg4 { Black resigns. } 1-0
+
+[Event "PGN: Black King-side Castling (O-O), then rook moves (Example 2)"]
+[xtraDet "Sample PGN"]
+1. e4 g6 { B06 Modern Defense } 2. f3 Nf6 3. Bc4 Bh6 4. Ne2 O-O 5.
+Nd4 Re8 { Black resigns. } 1-0
+[Event "PGN: White Queen-side Castling (O-O-O), then rook moves (Example 3)"]
+[xtraDet "Sample PGN"]
+1. d3 e5 { A00 Mieses Opening: Reversed Rat } 2. Qd2 d5 3. Nc3 Nf6
+4. b4 Bxb4 5. Ba3 c5 6. O-O-O Nc6 7. Re1 Qa5 { White resigns. } 0-1
+[Event "PGN: White King-side Castling (O-O), then rook moves (Example 4)"]
+[xtraDet "Sample PGN"]
+1. Nf3 f5 { A04 Zukertort Opening: Dutch Variation } 2. e3 Nc6 3.
+Bd3 e5 4. O-O d6 5. Re1 { White resigns. } 0-1
+`;
+let importedPGN = ``;
+let samplePGNArray = processMultiPGN(samplePGN);
+let ul = document.getElementById('pgn-list');
+samplePGNArray.forEach(item => {
+  let li = document.createElement('li');
+  li.textContent = item;
+  ul.appendChild(li);
+});
+
 // ====================================================================================================================
 // Helper Functions
-function findDifferences(before, after) {
-  if (before.length !== after.length) {
-    throw new Error('Both arrays must have the same length');
-  }
 
-  let differences = [];
-
-  for (let i = 0; i < before.length; i++) {
-    if (before[i] == after[i]) {
-      continue
-    } else {
-      differences.push(i + ": " + before[i] + ", " + after[i])
-    }
-  }
-  return differences;
-}
-
-function validatePGN() {
-  var inputPGN = document.getElementById("pgnTextArea").value;
-  //PGN Validation logic
+function validatePGN(inputPGN) {   //PGN Validation logic
   const chessObj = new Chess();
   var isValidPGN = chessObj.load_pgn(inputPGN);
   if (isValidPGN) {
     return inputPGN;
   } else {
-    alert("Invalid Format");
     return null;
   }
+}
+
+function formatPGN(pgnText) {
+  // Extract the header section, assuming it's made up of square-bracketed tags
+  const headerSection = pgnText.match(/\[.*?\]/g);
+  const headerFormatted = headerSection ? headerSection.join('\n') : '';
+
+  // Remove the header section from the text, then trim whitespace and replace multiple spaces with single spaces
+  const movesSection = pgnText.replace(/\[.*?\]/g, '').trim().replace(/\s+/g, ' ');
+
+  // If the header is present, include a blank line between the header and moves
+  return headerFormatted ? `${headerFormatted}\n\n${movesSection}` : movesSection;
+}
+
+
+function processMultiPGN(inputString) {
+  return inputString.split(/(?=\[Event )/g).filter(item => item.trim() !== ''); // Regex for detecting multiple PGNs, filter, then trim.
+}
+
+function processMovesAndTag(pgn) {    // Returns an array with movetext (idx 0) and tagpairs (idx 1) of a single PGN 
+  const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
+  let moveText = pgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '')
+  let tagPair = [];
+  let raw_tagpairs = pgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
+  if (raw_tagpairs != []) {
+    tagPair = raw_tagpairs.map(elem => elem.replaceAll("\"", '`'))
+  }
+  return [moveText, tagPair];
 }
 
 function formatCells(cell_content) {
@@ -70,8 +156,13 @@ function formatCells(cell_content) {
   }
 }
 
-function cleanTagPairs(pgn_tagpairs) {
-  return pgn_tagpairs.map(element => element.replace(/(\r\n|\n|\r)/gm, ""));
+function copyToClipboard(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
 }
 
 function display_xfen_debug(xfen) {
@@ -145,15 +236,9 @@ function ChessGame(ipgn) {
   
   // ipgn = input PGN ; tpgn = trimmed PGN
   let tpgn = ipgn.trim()
-
-  const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
-  this.pgn_movetext = tpgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '');
-  let raw_tagpairs = tpgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
-  if (raw_tagpairs != []) {
-    this.pgn_tagpairs = raw_tagpairs.map(elem => elem.replaceAll("\"", '`'))
-  } else {
-    this.pgn_tagpairs = [];
-  }
+  let move_and_tagpair = processMovesAndTag(tpgn);
+  this.pgn_movetext = move_and_tagpair[0];
+  this.pgn_tagpair = move_and_tagpair[1];
 
   this.fens = []; // holding the fens from the digested pgn
   let efens = []; // expanded fens as an array with full spaces as '.'
@@ -419,13 +504,133 @@ function clearTables() {
   pgnTextArea.value = "";
   jsonTextArea.value = "";
 
+  const importList = document.getElementById("import-pgn-list");
+  importList.innerHTML = "";
+
   globalChessGame = null;
 }
 
+function importChessGame() {
+  // Create an input element of type 'file'
+  var fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.style.display = "none"; // Hide the input element
+
+  // Set the accept attribute to allow only PGN files
+  fileInput.accept = ".pgn, .txt, .json";
+
+  // Add an event listener to handle the selected file
+  fileInput.addEventListener("change", function (event) {
+    var file = event.target.files[0]; // Get the selected file
+
+    if (file) {
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        var pgnText = e.target.result;
+        // Do something with the imported PGN text (e.g., display it in the textarea)
+        console.log(pgnText);
+        document.getElementById("pgnTextArea").value = pgnText;
+      };
+
+      reader.readAsText(file); // Read the selected file as text
+    }
+  });
+
+  // Trigger a click on the file input element
+  fileInput.click();
+}
+
+
+
+
+function bindImportClickEvents() {
+  const importListItems = document.querySelectorAll("#import-pgn-list li");
+  //const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
+  const pgnTextArea = document.getElementById("pgnTextArea");
+  const jsonTextArea = document.getElementById("JSONTextArea");
+  const tooltip = document.createElement("span");
+  tooltip.classList.add("custom-tooltip");
+  document.body.appendChild(tooltip); // Append the tooltip element to the body
+
+  importListItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      // Clear textareas
+      pgnTextArea.value = "";
+      jsonTextArea.value = "";
+
+      // Deselect all other items
+      importListItems.forEach((otherItem) =>
+        otherItem.classList.remove("selected")
+      );
+
+      // Select the clicked item
+      item.classList.add("selected");
+
+      // Show the "copied!" alert
+      //copyAlert.textContent = "Copied!";
+      //copyAlert.classList.add("show");
+
+      // Copy the content to clipboard
+      let textToCopy = formatPGN(item.textContent);
+      // Disabling copying to clipboard for imports: copyToClipboard(textToCopy);
+
+      // Set the tooltip text to the full content of the <li> element
+      tooltip.textContent = textToCopy;
+
+      // Paste the selected content into the pgnTextArea and jsonTextArea
+      pgnTextArea.value = textToCopy;
+
+      // Press 'submit' then 'export' button
+      processChessGame();
+      jsonTextArea.value = exportChessGame();
+
+      // After a delay, remove the copy alert tooltip
+      // setTimeout(() => {
+      //   copyAlert.textContent = "";
+      //   copyAlert.classList.remove("show");
+      // }, 1500); // Adjust the delay (in milliseconds) as needed
+    });
+  });
+}
+
+function submitChessGame() {
+  const importList = document.getElementById("import-pgn-list");
+  importList.innerHTML = "";
+  let inputPGN = document.getElementById("pgnTextArea").value;
+  let inputPGNArray = processMultiPGN(inputPGN);
+
+  const max_pgn = 100
+  if(inputPGNArray.length > max_pgn) {
+    alert(`You have exceeded maximum submission of ${max_pgn} PGNs.`)
+    return null;
+  }
+
+  let ul_import = document.getElementById("import-pgn-list");
+  inputPGNArray.forEach((item, i) => {
+    let li_import = document.createElement("li");
+    if (validatePGN(item) == null) {
+      alert(`PGN #${i+1} is invalid.`)
+      li_import.textContent = "INVALID PGN";
+    } else {
+      li_import.textContent = item;
+    }
+    ul_import.appendChild(li_import);
+  });
+
+  bindImportClickEvents();
+}
+
+
 // Process information into debug tables
 function processChessGame() {
-  let pgn = validatePGN();
-  let currentChessGame = new ChessGame(pgn);
+  let ipgn = document.getElementById("pgnTextArea").value;
+  if (validatePGN(ipgn) == null) {
+    alert("Invalid PGN.")
+    return null;
+  };
+
+  let currentChessGame = new ChessGame(ipgn);
   globalChessGame = currentChessGame;
 
   // Clear XFEN and Debug table header/row to prevent duplication
@@ -525,7 +730,6 @@ function processChessGame() {
   }
 }
 
-
 //  Export chess game into JSON
 function exportChessGame() {
   if (globalChessGame == null) {
@@ -537,5 +741,4 @@ function exportChessGame() {
   console.log("exporting: \n" + JSON.stringify(globalChessGame))
   return JSON.stringify(globalChessGame)
 }
-
 

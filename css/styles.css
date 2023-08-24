@@ -5,8 +5,7 @@
 
 .box {
   margin-left: 1rem;
-  margin-right: 2rem;
-  
+  margin-right: 1rem;
 }
 
 h1 {
@@ -58,6 +57,11 @@ th {
   margin-top: 2rem;
   padding-bottom: 1rem;
 }
+
+#json-label {
+  margin-left: 1rem;
+}
+
 
 #tbl100 {
   width: 100%;
@@ -112,8 +116,8 @@ tbody {
 .listbox-area {
   height: inherit;
   background-color: #f1f1f1;
-  padding: 10px;
-  width: 500px;
+  padding: 5px;
+
 }
 
 /* Styles for the scrollable container */
@@ -123,6 +127,7 @@ tbody {
   border: 1px solid #ccc; /* Add a border for the container */
   background: white;
   margin: 10px 5px 5px 5px;
+  width: 300px;
 }
 
 /* Styles for the list items */
@@ -130,7 +135,7 @@ ul  {
   padding-inline-start: 5px;
   padding-right: 5px;
 }
-#pgn-list li {
+#pgn-list li, #import-pgn-list li{
   cursor: pointer;
   padding: 5px;
   white-space: nowrap;
@@ -139,12 +144,12 @@ ul  {
 }
 
 /* Styles for the selected list item */
-#pgn-list li.selected {
-  background-color: #c0c0c0; /* Change the background color when selected */
+#pgn-list li.selected, #import-pgn-list li.selected {
+  background-color: #c0c0c0;
 }
 
 /* Styles to indicate the hover state */
-#pgn-list li:hover {
+#pgn-list li:hover, #import-pgn-list li:hover {
   background-color: #e5e5e5; /* Change the background color on hover */
 }
 
@@ -171,8 +176,9 @@ li:hover .custom-tooltip {
 }
 
 #JSONTextArea {
-  height: 225px;
-  width: 400px;
+  margin-left: 1rem;
+  height: 215px;
+  width: 200%;
 }
 
 .move-to {
