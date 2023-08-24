@@ -38,15 +38,17 @@
         </div>
       </div>
     </div>
-    <div class="box listbox-area" id="listbox">
-      <div>
-        <span class="listbox-label copy-alert">Sample PGNs: </span><span class="copy-alert" id="copyAlert"></span>
-        <div class="listbox-container">
-          <ul id="pgn-list">
-          </ul>
+    <!-- Sample PGNs 
+      <div class="box listbox-area" id="listbox">
+        <div>
+          <span class="listbox-label copy-alert">Sample PGNs: </span><span class="copy-alert" id="copyAlert"></span>
+          <div class="listbox-container">
+            <ul id="pgn-list">
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
+    -->
     <div id="export-area">
       <label id="json-label" for="JSONTextArea">Exported JSON Preview</label><br />
       <textarea id="JSONTextArea"></textarea>
@@ -92,62 +94,65 @@
 <script src="script.js"></script>
 
 <!-- JavaScript for sample PGNs box -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const listItems = document.querySelectorAll("#pgn-list li");
-    const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
-    const pgnTextArea = document.getElementById("pgnTextArea");
-    const jsonTextArea = document.getElementById("JSONTextArea");
-    const createGameButton = document.getElementById("createGameButton");
-    const exportJSONButton = document.getElementById("exportJSONButton");
 
-    const tooltip = document.createElement("span");
-    tooltip.classList.add("custom-tooltip");
-    document.body.appendChild(tooltip); // Append the tooltip element to the body
-
-    listItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        // Clear textareas
-        pgnTextArea.value = "";
-        jsonTextArea.value = "";
-
-        // Remove the highlight from any previously selected item
-        const selected = document.querySelector(".selected");
-        if (selected) {
-          selected.classList.remove("selected");
-        }
-
-        // Add the highlight to the clicked item
-        item.classList.add("selected");
-
-        // Show the "copied!" alert
-        copyAlert.textContent = "Copied!";
-        copyAlert.classList.add("show");
-
-        // Copy the content to clipboard
-        let textToCopy = formatPGN(item.textContent);
-        copyToClipboard(textToCopy);
-
-
-        // Set the tooltip text to the full content of the <li> element
-        tooltip.textContent = textToCopy;
-
-        // Paste the selected content into the pgnTextArea and jsonTextArea
-        pgnTextArea.value = textToCopy;
-        
-        // Press 'submit' then 'export' button
-        processChessGame();
-        jsonTextArea.value = exportChessGame();
-
-        // After a delay, remove the copy alert tooltip
-        setTimeout(() => {
-          copyAlert.textContent = "";
-          copyAlert.classList.remove("show");
-        }, 1500); // Adjust the delay (in milliseconds) as needed
+<!--
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const listItems = document.querySelectorAll("#pgn-list li");
+      const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
+      const pgnTextArea = document.getElementById("pgnTextArea");
+      const jsonTextArea = document.getElementById("JSONTextArea");
+      const createGameButton = document.getElementById("createGameButton");
+      const exportJSONButton = document.getElementById("exportJSONButton");
+  
+      const tooltip = document.createElement("span");
+      tooltip.classList.add("custom-tooltip");
+      document.body.appendChild(tooltip); // Append the tooltip element to the body
+  
+      listItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          // Clear textareas
+          pgnTextArea.value = "";
+          jsonTextArea.value = "";
+  
+          // Remove the highlight from any previously selected item
+          const selected = document.querySelector(".selected");
+          if (selected) {
+            selected.classList.remove("selected");
+          }
+  
+          // Add the highlight to the clicked item
+          item.classList.add("selected");
+  
+          // Show the "copied!" alert
+          copyAlert.textContent = "Copied!";
+          copyAlert.classList.add("show");
+  
+          // Copy the content to clipboard
+          let textToCopy = formatPGN(item.textContent);
+          copyToClipboard(textToCopy);
+  
+  
+          // Set the tooltip text to the full content of the <li> element
+          tooltip.textContent = textToCopy;
+  
+          // Paste the selected content into the pgnTextArea and jsonTextArea
+          pgnTextArea.value = textToCopy;
+          
+          // Press 'submit' then 'export' button
+          processChessGame();
+          jsonTextArea.value = exportChessGame();
+  
+          // After a delay, remove the copy alert tooltip
+          setTimeout(() => {
+            copyAlert.textContent = "";
+            copyAlert.classList.remove("show");
+          }, 1500); // Adjust the delay (in milliseconds) as needed
+        });
       });
     });
-  });
-</script>
+  </script>
+-->
 </body>
 
 </html>

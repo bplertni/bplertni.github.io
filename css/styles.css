@@ -127,7 +127,7 @@ tbody {
   border: 1px solid #ccc; /* Add a border for the container */
   background: white;
   margin: 10px 5px 5px 5px;
-  width: 300px;
+  width: 450px;
 }
 
 /* Styles for the list items */
@@ -135,6 +135,7 @@ ul  {
   padding-inline-start: 5px;
   padding-right: 5px;
 }
+
 #pgn-list li, #import-pgn-list li{
   cursor: pointer;
   padding: 5px;

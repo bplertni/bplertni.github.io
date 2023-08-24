@@ -88,14 +88,14 @@ Nd4 Re8 { Black resigns. } 1-0
 1. Nf3 f5 { A04 Zukertort Opening: Dutch Variation } 2. e3 Nc6 3.
 Bd3 e5 4. O-O d6 5. Re1 { White resigns. } 0-1
 `;
-let importedPGN = ``;
-let samplePGNArray = processMultiPGN(samplePGN);
-let ul = document.getElementById('pgn-list');
-samplePGNArray.forEach(item => {
-  let li = document.createElement('li');
-  li.textContent = item;
-  ul.appendChild(li);
-});
+// let importedPGN = ``;
+// let samplePGNArray = processMultiPGN(samplePGN);
+// let ul = document.getElementById('pgn-list');
+// samplePGNArray.forEach(item => {
+//   let li = document.createElement('li');
+//   li.textContent = item;
+//   ul.appendChild(li);
+// });
 
 // ====================================================================================================================
 // Helper Functions
@@ -111,12 +111,15 @@ function validatePGN(inputPGN) {   //PGN Validation logic
 }
 
 function formatPGN(pgnText) {
+  // Remove any sequence of digits followed by a colon at the start of the PGN
+  const pgnWithoutNumbers = pgnText.replace(/^\d+\:\s*/, '');
+
   // Extract the header section, assuming it's made up of square-bracketed tags
-  const headerSection = pgnText.match(/\[.*?\]/g);
+  const headerSection = pgnWithoutNumbers.match(/\[.*?\]/g);
   const headerFormatted = headerSection ? headerSection.join('\n') : '';
 
   // Remove the header section from the text, then trim whitespace and replace multiple spaces with single spaces
-  const movesSection = pgnText.replace(/\[.*?\]/g, '').trim().replace(/\s+/g, ' ');
+  const movesSection = pgnWithoutNumbers.replace(/\[.*?\]/g, '').trim().replace(/\s+/g, ' ');
 
   // If the header is present, include a blank line between the header and moves
   return headerFormatted ? `${headerFormatted}\n\n${movesSection}` : movesSection;
@@ -531,6 +534,7 @@ function importChessGame() {
         // Do something with the imported PGN text (e.g., display it in the textarea)
         console.log(pgnText);
         document.getElementById("pgnTextArea").value = pgnText;
+        submitChessGame();
       };
 
       reader.readAsText(file); // Read the selected file as text
@@ -539,6 +543,7 @@ function importChessGame() {
 
   // Trigger a click on the file input element
   fileInput.click();
+
 }
 
 
@@ -556,7 +561,6 @@ function bindImportClickEvents() {
   importListItems.forEach((item) => {
     item.addEventListener("click", () => {
       // Clear textareas
-      pgnTextArea.value = "";
       jsonTextArea.value = "";
 
       // Deselect all other items
@@ -567,29 +571,13 @@ function bindImportClickEvents() {
       // Select the clicked item
       item.classList.add("selected");
 
-      // Show the "copied!" alert
-      //copyAlert.textContent = "Copied!";
-      //copyAlert.classList.add("show");
-
       // Copy the content to clipboard
-      let textToCopy = formatPGN(item.textContent);
-      // Disabling copying to clipboard for imports: copyToClipboard(textToCopy);
-
-      // Set the tooltip text to the full content of the <li> element
-      tooltip.textContent = textToCopy;
-
-      // Paste the selected content into the pgnTextArea and jsonTextArea
-      pgnTextArea.value = textToCopy;
+      let pgn = formatPGN(item.textContent);
+      tooltip.textContent = pgn;
 
       // Press 'submit' then 'export' button
-      processChessGame();
+      processChessGame(pgn);
       jsonTextArea.value = exportChessGame();
-
-      // After a delay, remove the copy alert tooltip
-      // setTimeout(() => {
-      //   copyAlert.textContent = "";
-      //   copyAlert.classList.remove("show");
-      // }, 1500); // Adjust the delay (in milliseconds) as needed
     });
   });
 }
@@ -602,18 +590,19 @@ function submitChessGame() {
 
   const max_pgn = 100
   if(inputPGNArray.length > max_pgn) {
-    alert(`You have exceeded maximum submission of ${max_pgn} PGNs.`)
-    return null;
+    alert(`Your submission exceeds the maximum of ${max_pgn} PGNs.\nOnly the first 100 PGNs have been imported.`)
+    inputPGNArray = inputPGNArray.slice(0, max_pgn);
   }
-
+  console.log(`PGNS loaded: ${inputPGNArray.length}`)
+  
   let ul_import = document.getElementById("import-pgn-list");
   inputPGNArray.forEach((item, i) => {
     let li_import = document.createElement("li");
     if (validatePGN(item) == null) {
       alert(`PGN #${i+1} is invalid.`)
-      li_import.textContent = "INVALID PGN";
+      li_import.textContent = `${i + 1}: INVALID PGN`;
     } else {
-      li_import.textContent = item;
+      li_import.textContent = `${i + 1}: ${item}`;
     }
     ul_import.appendChild(li_import);
   });
@@ -623,14 +612,14 @@ function submitChessGame() {
 
 
 // Process information into debug tables
-function processChessGame() {
-  let ipgn = document.getElementById("pgnTextArea").value;
-  if (validatePGN(ipgn) == null) {
+function processChessGame(pgn) {
+
+  if (validatePGN(pgn) == null) {
     alert("Invalid PGN.")
     return null;
   };
 
-  let currentChessGame = new ChessGame(ipgn);
+  let currentChessGame = new ChessGame(pgn);
   globalChessGame = currentChessGame;
 
   // Clear XFEN and Debug table header/row to prevent duplication
