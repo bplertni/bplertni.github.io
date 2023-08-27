@@ -127,16 +127,25 @@ function formatPGN(pgnText) {
 
 
 function processMultiPGN(inputString) {
-  return inputString.split(/(?=\[Event )/g).filter(item => item.trim() !== ''); // Regex for detecting multiple PGNs, filter, then trim.
+  return inputString
+    .split(/(?=\[Event )/g)
+    .filter((item) => item.trim() !== ""); // Regex for detecting multiple PGNs, filter, then trim.
 }
 
-function processMovesAndTag(pgn) {    // Returns an array with movetext (idx 0) and tagpairs (idx 1) of a single PGN 
+function processMovesAndTag(pgn) {
+  // Returns an array with movetext (idx 0) and tagpairs (idx 1) of a single PGN
   const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
-  let moveText = pgn.replace(tagpairsRegex, '').trim().replace(/\n/g, '')
+  let moveText = pgn.replace(tagpairsRegex, "").trim().replace(/\n/g, "");
   let tagPair = [];
   let raw_tagpairs = pgn.match(tagpairsRegex) || []; // If no tagpair in PGN, return empty array
-  if (raw_tagpairs != []) {
-    tagPair = raw_tagpairs.map(elem => elem.replaceAll("\"", '`'))
+  if (raw_tagpairs != []) { // If tagpair exists, reduce it into an object with key-value pair.
+    tagPair = raw_tagpairs.reduce((accumulator, item) => {
+      const matches = item.match(/\[(\w+) "([^"]*)"\]/); // Regex parses each tagpair, and returns the key (idx = 1) and value (idx = 2)
+      if (matches && matches.length > 2) {
+        accumulator[matches[1]] = matches[2];
+      }
+      return accumulator;
+    }, {});
   }
   return [moveText, tagPair];
 }
@@ -534,6 +543,7 @@ function importChessGame() {
         // Do something with the imported PGN text (e.g., display it in the textarea)
         console.log(pgnText);
         document.getElementById("pgnTextArea").value = pgnText;
+        document.getElementById("JSONTextArea").value = "";
         submitChessGame();
       };
 
