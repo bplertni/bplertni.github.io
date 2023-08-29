@@ -11,7 +11,6 @@
 <body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
   <h1 id="title">PGN Parser Prototype</h1>
-  <span class="copy-alert"></span>
   <div class="flex-container">
     <div class="box input-box">
       <label for="pgnTextArea">Paste PGNs here:</label><br />
@@ -25,13 +24,14 @@
       <button id="clearTableButton" onclick="clearTables()">
         Clear
       </button>
-      <button id="exportJSONButton" onclick="exportChessGame()">
-        Export
+      <button id="exportJSONButton" onclick="exportAllPGN()">
+        Export All
       </button>
     </div>
     <div class="box listbox-area" id="listbox">
       <div>
-        <span class="listbox-label copy-alert">Imported/Submitted PGNs: </span><span class="copy-alert" id="copyAlert"></span>
+        <span class="listbox-label">Imported/Submitted PGNs</span>
+        <span id="import-alert"></span>
         <div class="listbox-container">
           <ul id="import-pgn-list">
           </ul>

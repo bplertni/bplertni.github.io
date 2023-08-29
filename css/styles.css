@@ -137,6 +137,7 @@ ul  {
 }
 
 #pgn-list li, #import-pgn-list li{
+  display: block;
   cursor: pointer;
   padding: 5px;
   white-space: nowrap;
@@ -188,4 +189,30 @@ li:hover .custom-tooltip {
 
 .move-from {
   background-color: lightcoral;
+}
+
+/* Tooltip container */
+.hover-tooltip {
+  position: relative;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.hover-tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.hover-tooltip:hover .tooltiptext {
+  visibility: visible;
 }

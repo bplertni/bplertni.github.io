@@ -1,4 +1,6 @@
 const DEBUG_FLAG = false;
+let isImported = false;
+let importedFileName = "";
 let globalChessGame = null;
 const XFEN_START = [ 'br1', 'bn1', 'bb1', 'bq1', 'bk1', 'bb2', 'bn2', 'br2' ,     
                      'bp1', 'bp2', 'bp3', 'bp4', 'bp5', 'bp6', 'bp7', 'bp8' ,
@@ -302,18 +304,6 @@ function ChessGame(ipgn) {
   // ====================================================================================
 
   this.history = chess1.history({ verbose: true }).map((map_obj) => {
-    if (DEBUG_FLAG) {
-      console.log("turn : ", local_ix + 1);
-    }
-    if (DEBUG_FLAG) {
-      console.log(
-        map_obj.color,
-        map_obj.piece,
-        map_obj.from,
-        map_obj.to,
-        map_obj.san
-      );
-    }
 
     // let sanTest = map_obj.san.toLowerCase()
     // if (sanTest.includes('o-o')) {
@@ -465,34 +455,16 @@ function ChessGame(ipgn) {
       promotedXPiece = this.xfens[i - 1][fromIndex];
       capturedXPiece = this.xfens[i - 1][toIndex];
       output = promotedXPiece + ", " + capturedXPiece;
-      if (DEBUG_FLAG) {
-        console.log(
-          promotedXPiece +
-            " captured " +
-            capturedXPiece +
-            " and was promoted at move " +
-            i
-        );
-      }
     } else if ("promotion" in this.history[i]) {
       promotedXPiece = this.xfens[i - 1][fromIndex];
       output = promotedXPiece;
-      if (DEBUG_FLAG) {
-        console.log(promotedXPiece + " was promoted at move " + i);
-      }
     } else if ("enpass" in this.history[i]) {
       enpassToIndex = squareCode2Idx(this.history[i - 1]["to"])   // Get 'to' square-index of the previous pawn piece that will be en passant'ed 
       capturedXPiece = this.xfens[i - 1][enpassToIndex]
       output = capturedXPiece;
-      if (DEBUG_FLAG) {
-        console.log(capturedXPiece + " was captured via en passant at move " + i)
-      }
     } else if ("captured" in this.history[i]) {
       capturedXPiece = this.xfens[i - 1][toIndex];
       output = capturedXPiece;
-      if (DEBUG_FLAG) {
-        console.log(capturedXPiece + " was captured at move " + i);
-      }
     } else {
       output = "";
     }
@@ -501,6 +473,21 @@ function ChessGame(ipgn) {
 }
 
 // ========== Button Functions ============ //
+
+function getCurrentTimeString() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+
+  // Get month, day, hour, minute, second and ensure they are in two-digit format
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+  const minute = String(now.getMinutes()).padStart(2, '0');
+  const second = String(now.getSeconds()).padStart(2, '0');
+
+  return `${year}${month}${day}_${hour}${minute}${second}`;
+}
 
 // Clear all tables
 function clearTables() {
@@ -519,7 +506,12 @@ function clearTables() {
   const importList = document.getElementById("import-pgn-list");
   importList.innerHTML = "";
 
+  const importAlertSpan = document.getElementById("import-alert");
+  importAlertSpan.innerHTML = "";
+
   globalChessGame = null;
+  isImported = false;
+  importedFileName = "";
 }
 
 function importChessGame() {
@@ -544,6 +536,7 @@ function importChessGame() {
         console.log(pgnText);
         document.getElementById("pgnTextArea").value = pgnText;
         document.getElementById("JSONTextArea").value = "";
+        importedFileName = file.name.replace(/\.\w+$/, '');
         submitChessGame();
       };
 
@@ -561,7 +554,6 @@ function importChessGame() {
 
 function bindImportClickEvents() {
   const importListItems = document.querySelectorAll("#import-pgn-list li");
-  //const copyAlert = document.getElementById("copyAlert"); // Select the unique copy alert element
   const pgnTextArea = document.getElementById("pgnTextArea");
   const jsonTextArea = document.getElementById("JSONTextArea");
   const tooltip = document.createElement("span");
@@ -574,9 +566,9 @@ function bindImportClickEvents() {
       jsonTextArea.value = "";
 
       // Deselect all other items
-      importListItems.forEach((otherItem) =>
-        otherItem.classList.remove("selected")
-      );
+      importListItems.forEach((otherItem) => {
+        otherItem.classList.remove("selected");
+      });
 
       // Select the clicked item
       item.classList.add("selected");
@@ -593,26 +585,29 @@ function bindImportClickEvents() {
 }
 
 function submitChessGame() {
+  isImported = true;
   const importList = document.getElementById("import-pgn-list");
   importList.innerHTML = "";
   let inputPGN = document.getElementById("pgnTextArea").value;
   let inputPGNArray = processMultiPGN(inputPGN);
 
-  const max_pgn = 100
-  if(inputPGNArray.length > max_pgn) {
-    alert(`Your submission exceeds the maximum of ${max_pgn} PGNs.\nOnly the first 100 PGNs have been imported.`)
-    inputPGNArray = inputPGNArray.slice(0, max_pgn);
+  const max_pgn = 100;
+  if (inputPGNArray.length > max_pgn) {
+    inputPGNArray = inputPGNArray.slice(0, max_pgn);        
+    const importAlertSpan = document.getElementById("import-alert");
+    importAlertSpan.innerHTML = "(only the first 100 PGNs was imported)"; // Display a message "only 100 PGNs have been imported" 
   }
-  console.log(`PGNS loaded: ${inputPGNArray.length}`)
-  
+  console.log(`PGNS loaded: ${inputPGNArray.length}`);
+
   let ul_import = document.getElementById("import-pgn-list");
   inputPGNArray.forEach((item, i) => {
     let li_import = document.createElement("li");
     if (validatePGN(item) == null) {
-      alert(`PGN #${i+1} is invalid.`)
-      li_import.textContent = `${i + 1}: INVALID PGN`;
+      alert(`PGN #${i + 1} is invalid.`);
     } else {
       li_import.textContent = `${i + 1}: ${item}`;
+      li_import.setAttribute("data", item);
+      li_import.classList.add("hover-tooltip");
     }
     ul_import.appendChild(li_import);
   });
@@ -626,11 +621,12 @@ function processChessGame(pgn) {
 
   if (validatePGN(pgn) == null) {
     alert("Invalid PGN.")
-    return null;
+    return "L";
   };
 
   let currentChessGame = new ChessGame(pgn);
   globalChessGame = currentChessGame;
+  isImported = true;
 
   // Clear XFEN and Debug table header/row to prevent duplication
   let tbody = document.getElementById("bdy100");
@@ -731,13 +727,54 @@ function processChessGame(pgn) {
 
 //  Export chess game into JSON
 function exportChessGame() {
-  if (globalChessGame == null) {
-    alert("Please press submit before exporting.")
+  let jsonOut = document.getElementById("JSONTextArea"); // Will be used for exporting to Python Server
+  jsonOut.value = "";
+  jsonOut.value = JSON.stringify(globalChessGame);
+  return JSON.stringify(globalChessGame);
+}
+
+function exportAllPGN() {
+  if (isImported == false) {
+    alert("Please import or submit PGNs before exporting.");
     return null;
   }
-  let jsonOut = document.getElementById("JSONTextArea") // Will be used for exporting to Python Server
-  jsonOut.value = JSON.stringify(globalChessGame)
-  console.log("exporting: \n" + JSON.stringify(globalChessGame))
-  return JSON.stringify(globalChessGame)
+
+  document
+    .getElementById("exportJSONButton")
+    .addEventListener("click", function () {
+      const importPgnList = document.getElementById("import-pgn-list");
+      const pgnItems = importPgnList.getElementsByTagName("li");
+      const pgnData = [];
+      const exportFileData = [];
+
+      for (let i = 0; i < pgnItems.length; i++) {
+        pgnData.push(formatPGN(pgnItems[i].innerText));
+      }
+
+      if (pgnData.length == 0) {
+        return;
+      } else {
+        console.log(pgnItems);
+        pgnData.forEach(items => {
+          const pgn = formatPGN(items);
+          const chessGame = new ChessGame(pgn);
+          exportFileData.push(chessGame);
+        })
+      }
+
+      const jsonData = JSON.stringify(exportFileData, null, 2);
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const currentTime = getCurrentTimeString();
+      let pgnAmount = pgnData.length;
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${importedFileName}_${pgnAmount}_${currentTime}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
 }
 
