@@ -335,8 +335,9 @@ function ChessGame(ipgn) {
     let capture = false;
     let castle_rook_to_ix = 0;
 
-    map_obj.xpiece = this.xfens[idx][squareCode2Idx(lfrom)];  // Add full piece information into history subojects.
+    let from_square_ix = squareCode2Idx(lfrom);
 
+    map_obj.xpiece = this.xfens[idx][from_square_ix];  // Add full piece information into history subojects.
     ppiece = xfen_prev[from_square_ix][1];
 
     if (map_obj.hasOwnProperty("captured")) {
