@@ -595,7 +595,7 @@ function submitChessGame() {
   if (inputPGNArray.length > max_pgn) {
     inputPGNArray = inputPGNArray.slice(0, max_pgn);        
     const importAlertSpan = document.getElementById("import-alert");
-    importAlertSpan.innerHTML = "(only the first 100 PGNs was imported)"; // Display a message "only 100 PGNs have been imported" 
+    importAlertSpan.innerHTML = "(only the first 100 PGNs were imported)"; // Display a message "only 100 PGNs have been imported" 
   }
   console.log(`PGNS loaded: ${inputPGNArray.length}`);
 
