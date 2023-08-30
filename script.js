@@ -303,7 +303,7 @@ function ChessGame(ipgn) {
   // =====  and also to expand the fens to xfens which includes colors and numbers
   // ====================================================================================
 
-  this.history = chess1.history({ verbose: true }).map((map_obj) => {
+  this.history = chess1.history({ verbose: true }).map((map_obj, idx) => {
 
     // let sanTest = map_obj.san.toLowerCase()
     // if (sanTest.includes('o-o')) {
@@ -335,7 +335,7 @@ function ChessGame(ipgn) {
     let capture = false;
     let castle_rook_to_ix = 0;
 
-    let from_square_ix = squareCode2Idx(lfrom);
+    map_obj.xpiece = this.xfens[idx][squareCode2Idx(lfrom)];  // Add full piece information into history subojects.
 
     ppiece = xfen_prev[from_square_ix][1];
 
