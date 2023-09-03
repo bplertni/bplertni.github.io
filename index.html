@@ -21,7 +21,7 @@
       <button id="importButton" onclick="importChessGame()">
         Import
       </button>
-      <button id="clearTableButton" onclick="clearTables()">
+      <button id="clearTableButton" onclick="clearAll()">
         Clear
       </button>
       <button id="exportJSONButton" onclick="exportAllPGN()">
@@ -29,7 +29,7 @@
       </button>
     </div>
     <div class="box listbox-area" id="listbox">
-      <div>
+      <div class="gray-box">
         <span class="listbox-label">Imported/Submitted PGNs</span>
         <span id="import-alert"></span>
         <div class="listbox-container">
@@ -92,6 +92,9 @@
 
 
 <script src="script.js"></script>
+</body>
+
+</html>
 
 <!-- JavaScript for sample PGNs box -->
 
@@ -141,7 +144,7 @@
           
           // Press 'submit' then 'export' button
           processChessGame();
-          jsonTextArea.value = exportChessGame();
+          jsonTextArea.value = exportPreview();
   
           // After a delay, remove the copy alert tooltip
           setTimeout(() => {
@@ -153,6 +156,3 @@
     });
   </script>
 -->
-</body>
-
-</html>

@@ -1,3 +1,7 @@
+* {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .flex-container {
   height: 230px;
   display: flex;
@@ -136,6 +140,11 @@ ul  {
   padding-right: 5px;
 }
 
+.gray-box {
+  overflow: visible;
+  position: relative;
+}
+
 #pgn-list li, #import-pgn-list li{
   display: block;
   cursor: pointer;
@@ -146,12 +155,12 @@ ul  {
 }
 
 /* Styles for the selected list item */
-#pgn-list li.selected, #import-pgn-list li.selected {
+#import-pgn-list li.selected {
   background-color: #c0c0c0;
 }
 
 /* Styles to indicate the hover state */
-#pgn-list li:hover, #import-pgn-list li:hover {
+#import-pgn-list li:hover {
   background-color: #e5e5e5; /* Change the background color on hover */
 }
 
@@ -162,6 +171,31 @@ li:hover .custom-tooltip {
   transform: translateX(-50%);
 }
 
+#import-pgn-list li::before {
+  --scale: 0;
+  content: attr(hover-data);
+  font-size: 12px;
+  white-space: pre-line;
+  position: absolute;
+  display: inline-block;
+  padding: 10px 10px 20px 10px;
+  width: 375px;
+  height: fit-content;
+  top: -15px;
+  left: 465px;
+  color: black;
+  background-color: #F3F3F3;
+  border: 3px solid gray;
+  z-index: 2; /* Added this line */
+  transform: translateX(5%) translateY(-10%) scale(var(--scale));
+  transition: transform 0.2s;
+  transform-origin: left;
+}
+
+#import-pgn-list li:hover::before {
+  --scale: 1;
+}
+
 .custom-tooltip {
   visibility: hidden;
   position: absolute;
@@ -170,7 +204,6 @@ li:hover .custom-tooltip {
   text-align: center;
   padding: 5px;
   border-radius: 4px;
-  z-index: 1;
 }
 
 #copyAlert {
@@ -191,28 +224,3 @@ li:hover .custom-tooltip {
   background-color: lightcoral;
 }
 
-/* Tooltip container */
-.hover-tooltip {
-  position: relative;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.hover-tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
- 
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.hover-tooltip:hover .tooltiptext {
-  visibility: visible;
-}

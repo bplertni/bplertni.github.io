@@ -1,4 +1,6 @@
-const DEBUG_FLAG = false;
+const DEBUG_FLAG = false; // flag variable; set to true to see debugging results
+
+// Initialize variables related to checking import state of chess game
 let isImported = false;
 let importedFileName = "";
 let globalChessGame = null;
@@ -22,7 +24,8 @@ const squareXlat = [
     'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'   // 
    ];  
 
-// Sample PGN list
+
+// Sample PGN list, currently used in debugging.
 const samplePGN = `
 [Event "Simple PGN"]
 [xtraDet "Sample PGN"]
@@ -90,8 +93,10 @@ Nd4 Re8 { Black resigns. } 1-0
 1. Nf3 f5 { A04 Zukertort Opening: Dutch Variation } 2. e3 Nc6 3.
 Bd3 e5 4. O-O d6 5. Re1 { White resigns. } 0-1
 `;
+
+// Code for importing string in samplePGN into the HTML
 // let importedPGN = ``;
-// let samplePGNArray = processMultiPGN(samplePGN);
+// let samplePGNArray = processMultinputPGN(samplePGN);
 // let ul = document.getElementById('pgn-list');
 // samplePGNArray.forEach(item => {
 //   let li = document.createElement('li');
@@ -100,9 +105,11 @@ Bd3 e5 4. O-O d6 5. Re1 { White resigns. } 0-1
 // });
 
 // ====================================================================================================================
-// Helper Functions
+// Helper Functions - Functions used in the logic of the ChessGame()
 
-function validatePGN(inputPGN) {   //PGN Validation logic
+//PGN Validation logic
+function validatePGN(inputPGN) {   
+  // Input a PGN, create default chess object, the chess.js automatically tests if PGN is valid or not.
   const chessObj = new Chess();
   var isValidPGN = chessObj.load_pgn(inputPGN);
   if (isValidPGN) {
@@ -112,30 +119,31 @@ function validatePGN(inputPGN) {   //PGN Validation logic
   }
 }
 
+// Cleans up a PGN
 function formatPGN(pgnText) {
   // Remove any sequence of digits followed by a colon at the start of the PGN
   const pgnWithoutNumbers = pgnText.replace(/^\d+\:\s*/, '');
 
-  // Extract the header section, assuming it's made up of square-bracketed tags
-  const headerSection = pgnWithoutNumbers.match(/\[.*?\]/g);
-  const headerFormatted = headerSection ? headerSection.join('\n') : '';
+  // Extract the tagpar section, assuming it's made up of square-bracketed tags
+  const tagPairs = pgnWithoutNumbers.match(/\[.*?\]/g);
+  const tagPairsFormatted = tagPairs ? tagPairs.join('\n') : '';
 
   // Remove the header section from the text, then trim whitespace and replace multiple spaces with single spaces
-  const movesSection = pgnWithoutNumbers.replace(/\[.*?\]/g, '').trim().replace(/\s+/g, ' ');
+  const moveText = pgnWithoutNumbers.replace(/\[.*?\]/g, '').trim().replace(/\s+/g, ' ');
 
   // If the header is present, include a blank line between the header and moves
-  return headerFormatted ? `${headerFormatted}\n\n${movesSection}` : movesSection;
+  return tagPairsFormatted ? `${tagPairsFormatted}\n\n${moveText}` : moveText;
 }
 
-
-function processMultiPGN(inputString) {
+// Takes in one large string containing PGN(s) and returns an array of PGNs.
+function processMultinputPGN(inputString) {
   return inputString
-    .split(/(?=\[Event )/g)
-    .filter((item) => item.trim() !== ""); // Regex for detecting multiple PGNs, filter, then trim.
+  .split(/(?=\[Event )/g)
+  .filter((item) => item.trim() !== ""); // use regex for detecting multiple PGNs, filter, then trim.
 }
 
+// Takes in a PGN and returns an array with movetext (at idx 0), tagpairs JSON objects (at idx 1), and raw tagpair string (at idx 2)
 function processMovesAndTag(pgn) {
-  // Returns an array with movetext (idx 0) and tagpairs (idx 1) of a single PGN
   const tagpairsRegex = /\[([^\]]+)\]/g; // Regex that matches lines that start and end with square brackets
   let moveText = pgn.replace(tagpairsRegex, "").trim().replace(/\n/g, "");
   let tagPair = [];
@@ -149,9 +157,10 @@ function processMovesAndTag(pgn) {
       return accumulator;
     }, {});
   }
-  return [moveText, tagPair];
+  return [moveText, tagPair, raw_tagpairs];
 }
 
+// Format the cells in the XFEN table
 function formatCells(cell_content) {
   let inner = "";
   if (cell_content.length <= 3) {
@@ -170,6 +179,7 @@ function formatCells(cell_content) {
   }
 }
 
+// Copy a text area into the user's clipboard
 function copyToClipboard(text) {
   const textarea = document.createElement("textarea");
   textarea.value = text;
@@ -242,14 +252,14 @@ function fen2array(ifen) {
 //   A chess game instance
 //   When created this object digests a PGN and populates a series of arrays that
 //   are indexed by the game turn/ply
-function ChessGame(ipgn) {
+function ChessGame(inputPGN) {
 
-  if (ipgn == null) {
+  if (inputPGN == null) {
     return null;
   }
   
-  // ipgn = input PGN ; tpgn = trimmed PGN
-  let tpgn = ipgn.trim()
+  // inputPGN = input PGN ; tpgn = trimmed PGN
+  let tpgn = inputPGN.trim()
   let move_and_tagpair = processMovesAndTag(tpgn);
   this.pgn_movetext = move_and_tagpair[0];
   this.pgn_tagpair = move_and_tagpair[1];
@@ -354,13 +364,10 @@ function ChessGame(ipgn) {
       capture = true;
     }
     if (lpiece == "p" && captured == "p" && (lto[1] == "6" || lto[1] == "3")) {
-      // might be an enpassent case
-      // and if the square we wound up on was empty previously
       if (xfen_prev[squareCode2Idx(lto)] == ".") {
+        // If this condition is met, an enpassant has happened. An "enpass = true" object is added to the history.
         enpass = true;
         map_obj.enpass = true;
-        // need to determine which pawn was captured, or just know that it is now gone
-        // since it will be removed from the board 3D array by the updates
       }
     }
 
@@ -369,7 +376,7 @@ function ChessGame(ipgn) {
     // #####     build the current xfen using the prior xfen,
     // #####     the current efen, and relevant san/move info
     // =============================================================================
-    // let from_square_ix = 0;
+
     let to_ix = squareCode2Idx(lto);
     for (ix = 0; ix < 64; ix++) {
       lpiece = efen[ix]; //xfen_curr[ix];
@@ -473,7 +480,7 @@ function ChessGame(ipgn) {
   }
 }
 
-// ========== Button Functions ============ //
+// ========== Button Functions - functions used to handle displaying and exporting PGNs ============ //
 
 function getCurrentTimeString() {
   const now = new Date();
@@ -491,7 +498,7 @@ function getCurrentTimeString() {
 }
 
 // Clear all tables
-function clearTables() {
+function clearAll() {
   let tbody = document.getElementById("bdy100");
   tbody.innerHTML = "";
   let tr = document.getElementById("tr100");
@@ -550,9 +557,6 @@ function importChessGame() {
 
 }
 
-
-
-
 function bindImportClickEvents() {
   const importListItems = document.querySelectorAll("#import-pgn-list li");
   const pgnTextArea = document.getElementById("pgnTextArea");
@@ -580,7 +584,7 @@ function bindImportClickEvents() {
 
       // Press 'submit' then 'export' button
       processChessGame(pgn);
-      jsonTextArea.value = exportChessGame();
+      jsonTextArea.value = exportPreview();
     });
   });
 }
@@ -590,7 +594,7 @@ function submitChessGame() {
   const importList = document.getElementById("import-pgn-list");
   importList.innerHTML = "";
   let inputPGN = document.getElementById("pgnTextArea").value;
-  let inputPGNArray = processMultiPGN(inputPGN);
+  let inputPGNArray = processMultinputPGN(inputPGN);
 
   const max_pgn = 100;
   if (inputPGNArray.length > max_pgn) {
@@ -607,8 +611,12 @@ function submitChessGame() {
       alert(`PGN #${i + 1} is invalid.`);
     } else {
       li_import.textContent = `${i + 1}: ${item}`;
-      li_import.setAttribute("data", item);
-      li_import.classList.add("hover-tooltip");
+      const formattedItem = processMovesAndTag(formatPGN(item));
+      const moveText = formattedItem[0]
+      let tagPair = "";
+      formattedItem[2].forEach(x => tagPair += (x + "\n"))
+      const hoverMessage = `${tagPair}\n${moveText}`;
+      li_import.setAttribute("hover-data", hoverMessage);
     }
     ul_import.appendChild(li_import);
   });
@@ -693,8 +701,9 @@ function processChessGame(pgn) {
     }
   }
 
-  // Iterate through the arrays and populate each column
+  // Iterate through the arrays and populate each column in the Debug Information Table
   for (let i = 1; i < currentChessGame.history.length; i++) {
+    
     // Create a new row
     const newRow = debugBody.insertRow();
 
@@ -727,35 +736,38 @@ function processChessGame(pgn) {
 }
 
 //  Export chess game into JSON
-function exportChessGame() {
-  let jsonOut = document.getElementById("JSONTextArea"); // Will be used for exporting to Python Server
+function exportPreview() {
+  let jsonOut = document.getElementById("JSONTextArea"); 
   jsonOut.value = "";
   jsonOut.value = JSON.stringify(globalChessGame);
   return JSON.stringify(globalChessGame);
 }
 
 function exportAllPGN() {
+
+  // Check if anything was imported
   if (isImported == false) {
     alert("Please import or submit PGNs before exporting.");
-    return null;
+    return;
   }
 
   document
-    .getElementById("exportJSONButton")
-    .addEventListener("click", function () {
-      const importPgnList = document.getElementById("import-pgn-list");
-      const pgnItems = importPgnList.getElementsByTagName("li");
-      const pgnData = [];
-      const exportFileData = [];
+    .getElementById("exportJSONButton")   
+    .addEventListener("click", function () {  // Execute this block of code once the "Export All" button was clicked  
+
+      const importPgnList = document.getElementById("import-pgn-list"); // store the <ul> element which contains multiple <li> elements.
+      const pgnItems = importPgnList.getElementsByTagName("li"); // store an array of <li> elements
+      const pgnData = []; // an array of raw PGN strings
+      const exportFileData = []; // an array of JSON objects (the processed PGNs)
 
       for (let i = 0; i < pgnItems.length; i++) {
-        pgnData.push(formatPGN(pgnItems[i].innerText));
+        pgnData.push(formatPGN(pgnItems[i].innerText)); // Extract inner string from each <li> element 
       }
 
-      if (pgnData.length == 0) {
-        return;
+      if (pgnData.length == 0) {  // Check if imported file is empty, if true, exit function.
+        return; 
       } else {
-        console.log(pgnItems);
+        // Process each raw PGN and push into exportFileData array.
         pgnData.forEach(items => {
           const pgn = formatPGN(items);
           const chessGame = new ChessGame(pgn);
@@ -763,19 +775,20 @@ function exportAllPGN() {
         })
       }
 
-      const jsonData = JSON.stringify(exportFileData, null, 2);
-      const blob = new Blob([jsonData], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const currentTime = getCurrentTimeString();
-      let pgnAmount = pgnData.length;
+      const jsonData = JSON.stringify(exportFileData, null, 2); // Convert the exportFileData array to JSON format
+      const blob = new Blob([jsonData], { type: "application/json" }); // Create a Blob with the JSON data
+      const url = URL.createObjectURL(blob);  // Create a URL for the Blob
+      const currentTime = getCurrentTimeString(); // Get the current time as a string
+      let pgnAmount = pgnData.length; // Get the number of imported PGNs
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${importedFileName}_${pgnAmount}_${currentTime}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
+      const a = document.createElement("a"); // Create an <a> element to trigger the download
+      a.href = url; // Set the properties for the download link
+      a.download = `${importedFileName}_${pgnAmount}_${currentTime}.json`; // Set the file name to the assigned format
+      document.body.appendChild(a); // Append the <a> element to the DOM
+      a.click();  // Simulate a click event on the <a> element to start the download
+      document.body.removeChild(a); // Remove the <a> element from the DOM
+      URL.revokeObjectURL(url); // Revoke the URL object to free up memory
     });
 }
 
